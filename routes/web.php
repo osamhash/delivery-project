@@ -20,8 +20,10 @@ Route::prefix('customers')->group(function() {
         Route::match(['put','patch'],'/{id}', [CustomerController::class,'update'])->name('customers.update');
 
 
+        Route::delete('/{id}/delete', [CustomerController::class,'destroy'])->name('customers.destroy');
+        Route::put('/customers/{id}/restore', [CustomerController::class, 'restore'])
+            ->name('customers.restore');
 
 
-        Route::get('/{id}/delete', [CustomerController::class,'destroy'])->name('customers.destroy');
-});
+        });
 

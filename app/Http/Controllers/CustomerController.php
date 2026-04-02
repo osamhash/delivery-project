@@ -38,7 +38,7 @@ class CustomerController extends Controller
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required|email|unique:users',
-            'password'=>'required|min:6',
+            // 'password'=>'required|min:6',
         ]);
 
         $customerRole = Role::where('name','customer')->first();
@@ -108,6 +108,16 @@ class CustomerController extends Controller
 
     }
 
+
+    public function restore($id)
+{
+    $customer = User::withTrashed()->findOrFail($id);
+    dd($customer);
+    $customer->restore();
+
+    return redirect()->route('customers.index')
+                     ->with('success', 'Customer restored successfully!');
+}
 
 
 
