@@ -21,8 +21,7 @@ Route::prefix('customers')->group(function() {
 
 
         Route::delete('/{id}/delete', [CustomerController::class,'destroy'])->name('customers.destroy');
-        Route::put('/customers/{id}/restore', [CustomerController::class, 'restore'])
-            ->name('customers.restore');
+
 
 
         });

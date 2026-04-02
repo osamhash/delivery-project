@@ -109,15 +109,7 @@ class CustomerController extends Controller
     }
 
 
-    public function restore($id)
-{
-    $customer = User::withTrashed()->findOrFail($id);
-    dd($customer);
-    $customer->restore();
 
-    return redirect()->route('customers.index')
-                     ->with('success', 'Customer restored successfully!');
-}
 
 
 
