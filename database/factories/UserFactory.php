@@ -25,14 +25,26 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'first_name' => fake()->firstName(),
+            'second_name' => fake()->firstName(),
+            'last_name'  => fake()->lastName(),
+            'email'      => fake()->unique()->safeEmail(),
+            'password'   => fake()->password(),
+            'phone'      => fake()->phoneNumber(),
+            // 'role_id' => \App\Models\Role::inRandomOrder()->first()?->id??1,
+            'role_id' =>1,
+            'gender' => fake()->randomElement([0,1]),
+            'address'    => fake()->address(),
+            'image_path' => fake()->imageUrl(),
+            'date_of_birth' => fake()->date(),
         ];
     }
 
+        public function admin(){
+            return $this->state(fn(array $p1) =>[
+                'role_id'=>1,
+            ] );
+        }
     /**
      * Indicate that the model's email address should be unverified.
      */

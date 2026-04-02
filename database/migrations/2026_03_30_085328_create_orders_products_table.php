@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('drivers', function (Blueprint $table) {
-            $table->id();
-            $table->boolean('is_available');
+        Schema::create('orders_products', function (Blueprint $table) {
+            $table->foreignId('order_id')->constrained('orders');
+            $table->foreignId('product_id')->constrained('products');
+            $table->primary(['order_id','product_id']);
+            $table->decimal('price', 10, 2);
+            $table->integer('quantity');
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('drivers');
+        Schema::dropIfExists('orders_products');
     }
 };

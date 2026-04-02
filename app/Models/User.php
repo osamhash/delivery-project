@@ -17,5 +17,14 @@ class User extends Model
         return $this->belongsTo(Role::class,'role_id','id');
     }
 
+     // علاقة اختيارية إذا كان User Driver
+    public function driver() {
+        return $this->hasOne(Driver::class, 'user_id', 'id');
+    }
+
+     // علاقة اختيارية إذا كان User Provider
+    public function provider() {
+        return $this->hasOne(Provider::class, 'user_id', 'id');
+    }
 
 }
