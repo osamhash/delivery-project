@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('first_name', 100);
+            $table->string('second_name', 100)->nullable();
+            $table->string('last_name', 100);
+            $table->string('email', 100)->unique();
+            $table->string('password', 255);
+            $table->string('phone', 20)->unique()->nullable();
+            $table->foreignId('role_id')->constrained('roles'); // FK لـ roles
+            $table->tinyInteger('gender')->nullable();
+            $table->string('address', 100)->nullable();
+            $table->string('image_path', 200)->nullable();
+            $table->date('date_of_birth')->nullable();
             $table->timestamps();
         });
     }
