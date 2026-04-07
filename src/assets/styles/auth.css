@@ -1,0 +1,77 @@
+/* تنسيقات عامة للحاويات */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+}
+
+.auth-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-card h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+/* التنسيق الخاص بالمدخلات */
+.form-group {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    border-color: #764ba2;
+}
+
+/* الأزرار */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #764ba2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #5a3782;
+}
+
+/* روابط التنقل */
+.auth-footer {
+    margin-top: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.auth-footer a {
+    color: #764ba2;
+    text-decoration: none;
+    font-weight: bold;
+}

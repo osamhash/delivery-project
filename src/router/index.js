@@ -1,16 +1,14 @@
-import { createRouter, createWebHistory } from "vue-router";
-
-import Products from "../views/Products.vue";
-import Cart from "../views/Cart.vue";
-
-const routes = [
-  { path: "/", component: Products },
-  { path: "/cart", component: Cart },
-];
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/Register.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    { path: '/login', name: 'login', component: LoginView },
+    { path: '/register', name: 'register', component: RegisterView },
+    { path: '/', redirect: '/login' }
+  ]
+})
 
-export default router;
+export default router
