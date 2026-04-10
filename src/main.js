@@ -1,6 +1,21 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import './style.css'
+import './assets/styles/global.css'
 import App from './App.vue'
-import router from './router' // 🔥 هذا السطر مهم
+import router from './router'
+import { initSeedData } from './data/seed'
+import { useAuthStore } from './stores/auth'
 
-createApp(App).use(router).mount('#app') // 🔥 وهذا كمان
+const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
+app.use(router)
+
+const authStore = useAuthStore()
+authStore.initAuth()
+
+initSeedData()
+
+app.mount('#app')
