@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    //
+    protected $guarded = [];
+
+
+    public function provider(){
+        return $this->belongsTo(Provider::class);
+    }
+
+
+
+
 }

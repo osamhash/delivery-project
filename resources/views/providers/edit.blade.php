@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Customer Details</title>
+    <title>provider Details</title>
 </head>
 <body>
-    <h1>Customer Edit</h1>
+    <h1>provider Edit</h1>
 
     @if($errors->any())
-        <ul style="color:red">
+        <ul style="color:#ff0000">
             @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
     @endif
-    <form action="{{route('customers.login')}}" method="POST"
+    <form action="{{route('providers.update',$provider->id)}}" method="POST"
         enctype="multipart/form-data" >
         @csrf
         @method('PUT')
         <label for="first_name">First Name</label>
-        <input type="text" name="first_name" value={{ $customer->first_name }}>
+        <input type="text" name="first_name" value={{ $provider->first_name }}>
+
+        <label for="second_name">second Name</label>
+        <input type="text" name="second_name" value={{ $provider->second_name }}>
 
         <label for="last_name">Last Name</label>
-        <input type="text" name="last_name" value={{ $customer->last_name }}>
+        <input type="text" name="last_name" value={{ $provider->last_name }}>
 
         <label for="email">email</label>
-        <input type="text" name="email" value={{ $customer->email }}>
-
-        <label for="password">password</label>
-        <input type="text" name="password" value={{ $customer->password }}>
+        <input type="text" name="email" value={{ $provider->email }}>
 
         <label for="phone">phone</label>
-        <input type="text" name="phone" value={{ $customer->phone }}>
+        <input type="text" name="phone" value={{ $provider->phone }}>
 
         <label for="address">address</label>
-        <input type="text" name="address" value={{ $customer->address }}>
+        <input type="text" name="address" value={{ $provider->address }}>
 
         <label for="id">date_of_birth</label>
-        <input type="text" name="date_of_birth" value={{ $customer->date_of_birth }}>
-        {{-- <a href="{{ route('customers.index') }}">Back to list</a> --}}
+        <input type="text" name="date_of_birth" value={{ $provider->date_of_birth }}>
+
+        <label for="id">type</label>
+        <input type="text" name="type" value={{ $provider->type }}>
+
+
+
         <button type="submit">save</button>
     </form>
 

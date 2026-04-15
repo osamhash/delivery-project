@@ -25,4 +25,11 @@ class Provider extends Model
     public function orders() {
         return $this->hasMany(Order::class, 'provider_id', 'id');
     }
+
+    public function favoredByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_providers');
+    }
+
+
 }

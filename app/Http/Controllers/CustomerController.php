@@ -6,111 +6,117 @@ use App\Http\Requests\CustomerRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
-    //list All Customer
-    public function index() {
-        // $customerRole= Role::where('name','customer')->first();
-        // // dd($customerRole);
-        // $customers = User::where('role_id',$customerRole->id)->get();
+    //get alll customers
+    public function index()
+    {
+        $role = Role::where('name', 'customer')->first();
 
-        $customerRole = Role::where('name', 'customer')->first();
-
-        $customers = collect();
-
-       if ($customerRole) {
-            $customers = User::where('role_id', $customerRole->id)->get();
+        if (!$role) {
+            return response()->json([]);
         }
-        // إرسال البيانات إلى Blade
-        return view('customer.index', compact('customers'));
 
+        $customers = User::where('role_id', $role->id)->get();
+
+        return response()->json([
+            'data' => $customers
+        ]);
     }
 
-    // Show create form
-    public function create() {
-        return view('customer.create');
-    }
-
-    // Store new customer
-    public function store(Request $request) {
-        $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'email'=>'required|email|unique:users',
-            // 'password'=>'required|min:6',
+    // post customer
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'first_name'  => 'required|string',
+            'second_name' => 'nullable|string',
+            'last_name'   => 'required|string',
+            'email'       => 'required|email|unique:users',
+            'password'    => 'required|min:6',
+            'phone'       => 'nullable|string',
         ]);
 
-        $customerRole = Role::where('name','customer')->first();
+        $role = Role::where('name', 'customer')->first();
 
-        User::create([
-            'first_name'=>$request->first_name,
-            'second_name'=>$request->second_name,
-            'last_name'=>$request->last_name,
-            'email'=>$request->email,
-            'password'=>bcrypt($request->password),
-            'role_id'=>$customerRole->id,
-            'phone'=>$request->phone,
+        $customer = User::create([
+            'first_name'  => $data['first_name'],
+            'second_name' => $data['second_name'] ?? null,
+            'last_name'   => $data['last_name'],
+            'email'       => $data['email'],
+            'password'    => Hash::make($data['password']),
+            'phone'       => $data['phone'] ?? null,
+            'role_id'     => $role->id,
         ]);
 
-        return redirect()->route('customers.index')->with('success','Customer created successfully!');
+        return response()->json([
+            'message' => 'Customer created successfully',
+            'data' => $customer
+        ], 201);
     }
 
-    public function show($id){
-        // dd($id);
-        $customerRole = Role::where('name','customer')->first();
-        // dd($customerRole);
-        $customer = User::where('role_id', $customerRole->id)
-                    ->where('id', $id)
-                    ->firstOrFail();
+    //جلب زبون محدد
+    public function show($id)
+    {
+        $role = Role::where('name', 'customer')->first();
 
-        return view('customer.show', compact('customer'));
+        $customer = User::where('role_id', $role->id)
+            ->where('id', $id)
+            ->first();
 
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $customer
+        ]);
     }
 
+    //update customer
+    public function update(CustomerRequest $request, $id)
+    {
+        $customer = User::find($id);
 
-    public function edit($id){
-
-        $customerRole = Role::where('name','customer')->first();
-        $customer = User::where('role_id', $customerRole->id)
-                    ->where('id', $id)
-                    ->firstOrFail();
-        return view('customer.edit',compact('customer'));
-    }
-
-    public function update(CustomerRequest $request,$id){
-        $customer = User::findOrFail($id);
-        // dd($request);
-        // $request->validate([
-        //     'email'=>'required|email|unique:users',
-        // ]);
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer not found'
+            ], 404);
+        }
 
         $customer->update([
-            // 'first_name'=>$request->first_name,
-            // 'second_name'=>$request->second_name,
-            // 'last_name'=>$request->last_name,
-            'email'=>$request->email,
-            // 'password'=>bcrypt($request->password),
-            // 'role_id'=>$customerRole->id,
-            'phone'=>$request->phone,
-            'address'=>$request->address,
+            'first_name'  => $request->first_name,
+            'second_name' => $request->second_name,
+            'last_name'   => $request->last_name,
+            'email'       => $request->email,
+            'phone'       => $request->phone,
+            'address'     => $request->address,
         ]);
-        return redirect()->route('customers.index')->with('success','Customer Updated successfully!');
+
+        return response()->json([
+            'message' => 'Customer updated successfully',
+            'data' => $customer
+        ]);
     }
 
-    public function destroy($id){
-        // dd($id);
-        $customer = User::findOrFail($id);
-        // dd($customer->first_name);
+    //delete customer
+    public function destroy($id)
+    {
+        $customer = User::find($id);
+
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer not found'
+            ], 404);
+        }
+
         $customer->delete();
 
-        return redirect()->route('customers.index')->with('success','Customer Deleted successfully!');
-
+        return response()->json([
+            'message' => 'Customer deleted successfully'
+        ]);
     }
-
-
-
-
-
-
 }
