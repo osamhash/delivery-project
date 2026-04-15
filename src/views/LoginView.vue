@@ -14,23 +14,7 @@
       <h2>مرحباً بك مجدداً</h2>
 
       <!-- اختيار الدور قبل تسجيل الدخول -->
-      <div class="role-toggle">
-        <button
-          :class="{ active: selectedRole === 'customer' }"
-          type="button"
-          @click="selectedRole = 'customer'"
-        >عميل</button>
-        <button
-          :class="{ active: selectedRole === 'driver' }"
-          type="button"
-          @click="selectedRole = 'driver'"
-        >سائق</button>
-        <button
-          :class="{ active: selectedRole === 'marketer' }"
-          type="button"
-          @click="selectedRole = 'marketer'"
-        >مركز تسويق</button>
-      </div>
+      
 
       <!-- نموذج تسجيل الدخول -->
       <form @submit.prevent="handleLogin">
@@ -68,32 +52,47 @@
 </template>
 
 <script setup>
-// استيراد دوال الحالة من Vue وواجهة التوجيه من vue-router
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../services/api'
 import '../assets/styles/auth.css'
 
 const router = useRouter()
 
-// الحالة المرتبطة بمدخلات النموذج
 const email = ref('')
 const password = ref('')
-const selectedRole = ref('customer')
 
-// قراءة الثيم الداكن من التخزين المحلي إن وُجد
+// الثيم
 const isDark = ref(localStorage.getItem('delivro_theme') === 'dark')
 
-// تنفيذ عملية تسجيل الدخول وحفظ الدور والبريد محلياً
-const handleLogin = () => {
-  const userRole = selectedRole.value
-  localStorage.setItem('delivro_role', userRole)
-  localStorage.setItem('delivro_email', email.value)
+// LOGIN
+const handleLogin = async () => {
+  try {
+    const response = await api.post('/auth/login', {
+      email: email.value,
+      password: password.value
+    })
 
-  // الانتقال إلى صفحة لوحة التحكم بعد تسجيل الدخول
-  router.push('/dashboard')
+    const data = response.data
+
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('delivro_role', data.user.role)
+
+    const routes = {
+      customer: '/dashboard',
+      driver: '/dashboard',
+      marketer: '/dashboard'
+    }
+
+    router.push(routes[data.user.role] || '/dashboard')
+
+  } catch (error) {
+    console.log(error)
+    alert(error.response?.data?.message || 'Login failed')
+  }
 }
 
-// تبديل ثيم الواجهة وتخزين الحالة محلياً
+// THEME
 const toggleTheme = () => {
   isDark.value = !isDark.value
   localStorage.setItem('delivro_theme', isDark.value ? 'dark' : 'light')
