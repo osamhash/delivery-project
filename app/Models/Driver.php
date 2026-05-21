@@ -10,11 +10,15 @@ class Driver extends Model
      use HasFactory;
 
     protected $fillable = ['user_id','is_available'];
-
+    protected $casts = [
+        'is_available' => 'boolean',
+    ];
     // كل Driver ينتمي ل User واحد
     public function user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+
 
     // يمكن أن يكون للـ Driver العديد من Orders
     public function orders() {

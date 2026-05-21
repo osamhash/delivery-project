@@ -2,16 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRequest;
+use App\Models\Order;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
+
+   public function dashboard(Request $request)
+    {
+        $user = $request->user();
+
+        // حماية من أي relation break
+        $activeOrdersCount = Order::where('user_id', $user->id)
+            ->whereIn('status_id', [1, 2])
+            ->count();
+
+        $favoritesCount = $user->favoriteProviders()
+            ? $user->favoriteProviders()->count()
+            : 0;
+
+       $orders = Order::with(['provider', 'driver', 'status', 'review'])
+        ->where('user_id', $user->id)
+        ->latest()
+        ->take(10)
+        ->get();
+        $rich = 8;
+        $monthlySpending = Order::where('user_id', $user->id)
+        ->whereMonth('created_at', now()->month)
+        ->sum('total_price');
+
+        $lastMonthSpending = Order::where('user_id', $user->id)
+        ->whereMonth('created_at', now()->subMonth()->month)
+        ->sum('total_price');
+
+        return response()->json([
+            'active_orders' => $activeOrdersCount,
+            'favorites' => $favoritesCount,
+            'orders' => $orders,
+            'monthly_spending' => $monthlySpending,
+            'last_month_spending' => $lastMonthSpending,
+        ]);
+    }
+
+
     //get alll customers
-    public function index()
+    public static function index()
     {
         $role = Role::where('name', 'customer')->first();
 
@@ -57,24 +98,19 @@ class CustomerController extends Controller
     }
 
     //جلب زبون محدد
-    public function show($id)
+    public function show(User $user): JsonResponse
     {
-        $role = Role::where('name', 'customer')->first();
-
-        $customer = User::where('role_id', $role->id)
-            ->where('id', $id)
-            ->first();
-
-        if (!$customer) {
-            return response()->json([
-                'message' => 'Customer not found'
-            ], 404);
-        }
-
         return response()->json([
-            'data' => $customer
+            'id'         => $user->id,
+            'first_name' => $user->first_name,
+            'last_name'  => $user->last_name,
+            'email'      => $user->email,
+            'phone'      => $user->phone,
+            'address'    => $user->address,
+            'image_path' => $user->image_path,
         ]);
     }
+
 
     //update customer
     public function update(CustomerRequest $request, $id)

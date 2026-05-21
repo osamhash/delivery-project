@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CustomerRequest;
+use App\Models\Product;
 use App\Models\Provider;
+use App\Http\Requests\CustomerRequest;
+use App\Http\Requests\ProviderRequest;
+use App\Http\Resources\ProviderResource;
 use App\Models\Role;
 use App\Models\User;
 use GuzzleHttp\Handler\Proxy;
@@ -12,12 +15,67 @@ use Illuminate\View\View;
 
 class ProviderController extends Controller
 {
-     //list All Provider
-    public function index() {
-        $providers = Provider::with('user')->get();
-        dd($providers->toArray());
-        return view('providers.index', compact('providers'));
+
+    public function products($id, Request $request)
+    {
+        $query = Product::where('provider_id', $id);
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+        if ($request->min_price) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->max_price) {
+            $query->where('price', '<=', $request->max_price);
+        }
+        return $query->get();
     }
+
+
+    // list All Provider
+   public function index()
+{
+    $providers = Provider::with('user')->get();
+
+    foreach ($providers as $provider) {
+        if ($provider->user && $provider->user->image_path) {
+            $provider->user->image_url = asset('storage/' . $provider->user->image_path);
+        } else {
+            $provider->user->image_url = null;
+        }
+    }
+
+    return response()->json($providers);
+}
+/**
+     * GET /api/providers
+     * Supports: ?search=, ?type=, ?per_page=
+     */
+    // public function index(ProviderRequest $request)
+    // {
+    //     $query = Provider::with(['user', 'products'])
+    //         ->withCount('orders');                    // عدد الطلبات لكل provider
+
+    //     // ── بحث بالاسم أو النوع ──────────────────────────────
+    //     if ($search = $request->search) {
+    //         $query->where(function ($q) use ($search) {
+    //             $q->where('type', 'like', "%{$search}%")
+    //               ->orWhereHas('user', function ($u) use ($search) {
+    //                   $u->where('first_name', 'like', "%{$search}%")
+    //                     ->orWhere('last_name',  'like', "%{$search}%");
+    //               });
+    //         });
+    //     }
+
+    //     // ── فلتر بالنوع ───────────────────────────────────────
+    //     if ($type = $request->type) {
+    //         $query->where('type', $type);
+    //     }
+
+    //     $providers = $query->latest()->get();
+    //     $r = ProviderResource::collection($providers);
+    //     return $r;
+    // }
 
     // Show create form
     public function create() {

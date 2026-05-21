@@ -26,7 +26,7 @@ class Provider extends Model
         return $this->hasMany(Order::class, 'provider_id', 'id');
     }
 
-    public function favoredByUsers()
+    public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorite_providers');
     }
