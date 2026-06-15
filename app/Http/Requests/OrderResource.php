@@ -15,7 +15,7 @@ class OrderResource extends JsonResource
             'driver_id'      => $this->driver_id,
             'status'         => $this->status?->name,
             'total_price'    => (float) $this->total_price,
-            'payment_status' => $this->payment_status,
+            'payment_method' => $this->payment_method,
             'order_address'  => $this->order_address,
             'products'       => $this->products->map(fn($p) => [
                 'id'          => $p->id,

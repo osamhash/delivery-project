@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -112,32 +113,94 @@ class CustomerController extends Controller
     }
 
 
-    //update customer
-    public function update(CustomerRequest $request, $id)
-    {
-        $customer = User::find($id);
+    //update customer 6/2/2026
+    // public function update(CustomerRequest $request, $id)
+    // {
+    //     $customer = User::find($id);
 
-        if (!$customer) {
-            return response()->json([
-                'message' => 'Customer not found'
-            ], 404);
-        }
+    //     if (!$customer) {
+    //         return response()->json([
+    //             'message' => 'Customer not found'
+    //         ], 404);
+    //     }
 
-        $customer->update([
-            'first_name'  => $request->first_name,
-            'second_name' => $request->second_name,
-            'last_name'   => $request->last_name,
-            'email'       => $request->email,
-            'phone'       => $request->phone,
-            'address'     => $request->address,
-        ]);
+    //     $customer->update([
+    //         'first_name'  => $request->first_name,
+    //         'second_name' => $request->second_name,
+    //         'last_name'   => $request->last_name,
+    //         'email'       => $request->email,
+    //         'phone'       => $request->phone,
+    //         'address'     => $request->address,
+    //     ]);
 
-        return response()->json([
-            'message' => 'Customer updated successfully',
-            'data' => $customer
-        ]);
+    //     return response()->json([
+    //         'message' => 'Customer updated successfully',
+    //         'data' => $customer
+    //     ]);
+    // }
+
+    public function update(Request $request, $id)
+{
+    // التحقق من صحة البيانات
+    $request->validate([
+        'first_name' => 'required|string|max:100',
+        'last_name' => 'required|string|max:100',
+        'email' => 'required|email|unique:users,email,' . $id,
+        'phone' => 'nullable|string|max:20',
+        'address' => 'nullable|string|max:100',
+        'date_of_birth' => 'nullable|date',
+        'gender' => 'nullable|in:0,1',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // جلب المستخدم
+    $user = User::findOrFail($id);
+
+    // التحقق من أن المستخدم الحالي يعدل بياناته الخاصة
+    if ($user->id !== $request->user()->id) {
+        return response()->json(['message' => 'غير مصرح لك بتعديل هذا الحساب'], 403);
     }
 
+    // تحديث بيانات المستخدم
+    $user->update([
+        'first_name' => $request->first_name,
+        'second_name' => $request->second_name,
+        'last_name' => $request->last_name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'address' => $request->address,
+        'date_of_birth' => $request->date_of_birth,
+        'gender' => $request->gender,
+    ]);
+
+    // معالجة رفع الصورة
+    if ($request->hasFile('image')) {
+        // حذف الصورة القديمة إذا وجدت
+        if ($user->image_path) {
+            Storage::disk('public')->delete($user->image_path);
+        }
+
+        $imagePath = $request->file('image')->store('users', 'public');
+        $user->image_path = $imagePath;
+        $user->save();
+    }
+
+    return response()->json([
+        'message' => 'تم تحديث بيانات الحساب بنجاح',
+        'user' => [
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'second_name' => $user->second_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'date_of_birth' => $user->date_of_birth,
+            'gender' => $user->gender,
+            'image_path' => $user->image_path ? asset('storage/' . $user->image_path) : null,
+        ]
+    ]);
+}
     //delete customer
     public function destroy($id)
     {

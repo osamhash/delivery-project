@@ -16,7 +16,7 @@ class PaymentController extends Controller
     private function canBePaid($order)
     {
         $completedStatusId = OrderStatus::where('name', 'completed')->value('id');
-        return $order->status_id === $completedStatusId && $order->payment_status === 'pending';
+        return $order->status_id === $completedStatusId && $order->payment_method === 'pending';
     }
 
     public function payOnDelivery(Order $order)
@@ -32,7 +32,7 @@ class PaymentController extends Controller
         }
 
         DB::transaction(function () use ($order) {
-            $order->update(['payment_status' => 'paid']);
+            $order->update(['payment_method' => 'paid']);
 
             // Notify driver
             if ($order->driver && $order->driver->user_id) {
@@ -48,7 +48,7 @@ class PaymentController extends Controller
 
         return response()->json([
             'message' => 'تم الدفع بنجاح',
-            'payment_status' => $order->payment_status
+            'payment_method' => $order->payment_method
         ]);
     }
 
@@ -59,7 +59,7 @@ class PaymentController extends Controller
         }
 
         return response()->json([
-            'payment_status' => $order->payment_status,
+            'payment_method' => $order->payment_method,
             'can_pay' => $this->canBePaid($order)
         ]);
     }

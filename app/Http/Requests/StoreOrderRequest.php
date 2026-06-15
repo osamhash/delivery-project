@@ -15,7 +15,7 @@ class StoreOrderRequest extends FormRequest
             'provider_id'    => 'required|exists:providers,id',
             'driver_id'      => 'required|exists:drivers,id',
             'total_price'    => 'required|numeric|min:0',
-            'payment_status' => 'required|string|in:cash,card,apple_pay,stc_pay',
+            'payment_method' => 'required|string|in:cash,card,apple_pay,stc_pay',
             'order_address'  => 'required|string|max:100',
 
             'products'              => 'required|array|min:1',

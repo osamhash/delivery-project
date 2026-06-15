@@ -13,7 +13,7 @@ class Order extends Model
     'driver_id',
     'status_id',
     'total_price',
-    'payment_status',
+    'payment_method',
     'order_address','rejection_reason'
 ];
     protected $casts = [
@@ -51,5 +51,6 @@ class Order extends Model
     {
         return $this->hasOne(Review::class);
     }
+
 
 }

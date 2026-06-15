@@ -34,12 +34,12 @@ class OrderController extends Controller
     {
         $request->validate([
             'status_id'      => 'sometimes|exists:order_status,id',
-            'payment_status' => 'sometimes|in:pending,paid,failed',
+            'payment_method' => 'sometimes|in:pending,paid,failed',
             'driver_id'      => 'sometimes|exists:drivers,id',
         ]);
 
         $order = Order::findOrFail($id);
-        $order->update($request->only(['status_id', 'payment_status', 'driver_id']));
+        $order->update($request->only(['status_id', 'payment_method', 'driver_id']));
 
         $completedStatus = OrderStatus::where('name', 'completed')->first();
         if ($completedStatus && $order->status_id == $completedStatus->id) {
@@ -132,11 +132,10 @@ class OrderController extends Controller
                 'driver_id'      => $request->driver_id,
                 'status_id'      => 1,                       // 1 = pending (أول سجل في order_status)
                 'total_price'    => $request->total_price,
-                'payment_status' => $request->payment_status,
+                'payment_method' => $request->payment_method,
                 'order_address'  => $request->order_address,
             ]);
-
-            // 3. أضف المنتجات إلى orders_products
+             // 3. أضف المنتجات إلى orders_products
             foreach ($request->products as $item) {
                 $order->products()->attach($item['product_id'], [
                     'quantity'   => $item['quantity'],
@@ -224,5 +223,44 @@ class OrderController extends Controller
             ->paginate(10);
     }
 
+    /**
+     * تحديث حالة الطلب (للتاجر فقط)
+     * المتوقع: status = 'accepted' أو 'completed'
+     */
+    public function updateProviderOrderStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:accepted,completed',
+        ]);
 
+        $order = Order::findOrFail($id);
+        $provider = $request->user()->provider;
+
+        if (!$provider || $order->provider_id !== $provider->id) {
+            return response()->json(['message' => 'غير مصرح لك بتحديث هذا الطلب'], 403);
+        }
+
+        // تعيين status_id المناسب بناءً على الاسم
+        $statusName = $request->status;
+        $status = \App\Models\OrderStatus::where('name', $statusName)->first();
+
+        if (!$status) {
+            return response()->json(['message' => 'حالة غير صالحة'], 422);
+        }
+
+        $order->status_id = $status->id;
+        $order->save();
+
+        // إذا تم إكمال الطلب، جعل السائق متاحاً مجدداً
+        if ($statusName === 'completed') {
+            if ($order->driver) {
+                $order->driver->update(['is_available' => true]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'تم تحديث حالة الطلب',
+            'order' => $order->load(['user', 'status', 'products']),
+        ]);
+    }
 }

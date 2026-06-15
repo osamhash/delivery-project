@@ -135,30 +135,30 @@ class ProviderController extends Controller
         return view('providers.edit',compact('provider'));
     }
 
-    public function update(CustomerRequest $request,$id){
-        $provider = Provider::join('users', 'providers.user_id', '=', 'users.id')
-        ->select('providers.*',
-        'users.first_name',
-        'users.second_name',
-        'users.last_name',
-        'users.email',
-        'users.phone',
-        'users.address',
-        'users.date_of_birth')->first();
-       // dd($request->all(),$id);
-        $provider->update([
-            'first_name'=>$request->first_name,
-            'second_name'=>$request->second_name,
-            'last_name'=>$request->last_name,
-            'email'=>$request->email,
-            // 'password'=>bcrypt($request->password),
-            //'role_id'=>$customerRole->id,
-            'phone'=>$request->phone,
-            'address'=>$request->address,
-            'date_of_birth'=>$request->date_of_birth,
+    public function update(Request $request, $id)
+    {
+        // التحقق من صحة البيانات
+        $request->validate([
+            'type' => 'required|string|max:100',
         ]);
-        dd($provider);
-        return redirect()->route('providers.index')->with('success','providers Updated successfully!');
+
+        // جلب الـ provider
+        $provider = Provider::findOrFail($id);
+
+        // التحقق من أن المستخدم الحالي هو صاحب هذا المتجر
+        if ($provider->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'غير مصرح لك بتعديل هذا المتجر'], 403);
+        }
+
+        // تحديث نوع المتجر فقط
+        $provider->update([
+            'type' => $request->type
+        ]);
+
+        return response()->json([
+            'message' => 'تم تحديث بيانات المتجر بنجاح',
+            'provider' => $provider
+        ]);
     }
 
     public function destroy($id){
@@ -171,7 +171,16 @@ class ProviderController extends Controller
 
     }
 
-    public function dashboard(Request $request):View{
-        return view('dashboard');
+    // public function dashboard(Request $request):View{
+    //     return view('dashboard');
+    // }
+
+    public function getMyProvider(Request $request)
+    {
+        $provider = $request->user()->provider;
+        if (!$provider) {
+            return response()->json(['message' => 'No provider found'], 404);
+        }
+        return response()->json([$provider->load('user')]);
     }
 }

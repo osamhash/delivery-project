@@ -5,6 +5,7 @@
 // use App\Http\Controllers\Api\PaymentController;
 // use App\Http\Controllers\Api\ReviewController;
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\ReviewController ;
 use App\Http\Controllers\PaymentController ;
+use App\Http\Controllers\ProviderDashboardController;
 use App\Models\Driver;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-
+Route::get('/providers/{provider}/products', [ProductController::class, 'byProvider']);
 Route::prefix('auth')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
@@ -92,6 +94,9 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::prefix('driver')->group(function () {
+
+        Route::post('/orders/{order}/cancel',       [DriverController::class, 'cancelOrder']);
+        Route::post('/orders/{order}/confirm-cash', [DriverController::class, 'confirmCashPayment']);
 
         Route::get('/dashboard', [DriverController::class, 'dashboard']);
 
@@ -193,7 +198,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/provider/{id}/orders', [OrderController::class, 'providerOrders']);
 
-    Route::get('/providers/{provider}/products', [ProductController::class, 'byProvider']);
+
 
     /*
     |--------------------------------------------------------------------------
@@ -315,6 +320,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('customers')->group(function () {
             Route::get('/', [CustomerController::class, 'index']);
+            Route::post('/{id}', [CustomerController::class, 'update']);
             Route::post('/', [CustomerController::class, 'store']);
             Route::get('/{id}', [CustomerController::class, 'show']);
             Route::put('/{id}', [CustomerController::class, 'update']);
@@ -330,6 +336,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
+            Route::get('/providers/me', [ProviderController::class, 'getMyProvider']);
+            Route::put('/providers/{id}', [ProviderController::class, 'update']);
         });
     });
 
@@ -354,7 +362,6 @@ Route::get('/test', function () {
 });
 Route::middleware('auth:sanctum')->get('/customer/dashboard', [CustomerController::class, 'dashboard']);
 
-Route::get('/providers', [ProviderController::class, 'index']);
 
 
 Route::get('/orders', [OrderController::class, 'index']);          // عرض كل الطلبات
@@ -381,11 +388,9 @@ Route::get('/statuses', [OrderController::class, 'statuses']);
 
 
 
-// Route::get('/providers', [ProviderController::class, 'index']);
-
 Route::get('/drivers/available', [DriverController::class, 'available']);
 
-
+Route::get('/v1/drivers',    [AdminController::class, 'getDrivers']);
 
 
 Route::prefix('v1')->group(function () {
@@ -408,4 +413,47 @@ Route::prefix('v1')->group(function () {
 
 Route::get('providers',        [ProviderController::class, 'index']);   // يدعم ?search= و ?type=
 Route::get('providers/stats',  [ProviderController::class, 'stats']);   // إحصائيات سريعة
+
+
+Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
+    // الإحصائيات والطلبات
+    Route::get('/dashboard/stats', [ProviderDashboardController::class, 'stats']);
+    Route::get('/dashboard/recent-orders', [ProviderDashboardController::class, 'recentOrders']);
+    Route::get('/dashboard/all-orders', [ProviderDashboardController::class, 'allOrders']);
+
+    // المنتجات (إدارة المنتجات الخاصة بالتاجر)
+    Route::get('/my-products', [ProductController::class, 'myProducts']);
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+    // تحديث حالة الطلب
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateProviderOrderStatus']);
+
+    // التقييمات
+    Route::get('/reviews', [ReviewController::class, 'providerReviews']);
+    Route::get('/rating', [ReviewController::class, 'providerRating']);
+});
+
+
+Route::middleware(['auth:api', 'admin'])->group(function () {
+
+    // المستخدمين
+    Route::get('/customers',     [AdminController::class, 'getCustomers']);
+
+    Route::put('/users/{id}',    [AdminController::class, 'updateUser']);
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+
+    // الطلبات
+    Route::get('/orders',           [AdminController::class, 'getOrders']);
+    Route::put('/orders/{id}',      [AdminController::class, 'updateOrder']);
+    Route::delete('/orders/{id}',   [AdminController::class, 'deleteOrder']);
+    Route::match(['put', 'post'], '/admin/profile', [AdminController::class, 'updateAdminProfile']);
+});
+
+
+Route::post('reviews', [ReviewController::class, 'store']);
+
+// تقييمات السائق
+Route::get('driver/reviews', [ReviewController::class, 'driverReviews']);
 

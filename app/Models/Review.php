@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    protected $fillable = ['user_id', 'order_id', 'rating', 'comment'];
+    protected $fillable = ['user_id', 'provider_id', 'order_id', 'rating', 'comment'];
 
     protected $casts = [
         'rating' => 'integer'
@@ -19,5 +19,9 @@ class Review extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
     }
 }
