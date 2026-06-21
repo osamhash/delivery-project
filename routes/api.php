@@ -1,459 +1,173 @@
 <?php
 
-// use App\Http\Controllers\Api\DriverController;
-// use App\Http\Controllers\Api\NotificationController;
-// use App\Http\Controllers\Api\PaymentController;
-// use App\Http\Controllers\Api\ReviewController;
-
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProviderController;
-use App\Http\Controllers\ReviewController ;
-use App\Http\Controllers\PaymentController ;
 use App\Http\Controllers\ProviderDashboardController;
+use App\Http\Controllers\ReviewController;
 use App\Models\Driver;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes
+| Public Routes (No Authentication Required)
 |--------------------------------------------------------------------------
 */
-Route::get('/providers/{provider}/products', [ProductController::class, 'byProvider']);
+
+// Test endpoint
+Route::get('/test', function () {
+    return response()->json(['message' => 'API WORKING']);
+});
+
+// Auth
 Route::prefix('auth')->group(function () {
-
     Route::post('/register', [AuthController::class, 'register']);
-
     Route::post('/login', [AuthController::class, 'login']);
-
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-Route::get('/test', function () {
-
-    return response()->json([
-        'message' => 'API WORKING'
-    ]);
-});
-
+// Public provider routes
 Route::get('/providers', [ProviderController::class, 'index']);
+Route::get('/providers/{provider}/products', [ProductController::class, 'byProvider']);
 
+// Public driver routes
 Route::get('/drivers/available', function () {
-
-    return Driver::where('is_available', true)
-        ->with('user')
-        ->get();
+    return Driver::where('is_available', true)->with('user')->get();
 });
 
+// Order statuses
 Route::get('/statuses', [OrderController::class, 'statuses']);
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes
+| Protected Routes (Requires Authentication)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Auth
-    |--------------------------------------------------------------------------
-    */
-
+    // ========== AUTH ==========
     Route::prefix('auth')->group(function () {
-
         Route::post('/logout', [AuthController::class, 'logout']);
-
         Route::get('/me', [AuthController::class, 'me']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Customer
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/customer/dashboard', [CustomerController::class, 'dashboard']);
-
-    Route::get('/customer/profile', [CustomerController::class, 'show']);
-
-    Route::put('/customer/profile', [CustomerController::class, 'update']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Driver Routes
-    |--------------------------------------------------------------------------
-    */
-
-    Route::prefix('driver')->group(function () {
-
-        Route::post('/orders/{order}/cancel',       [DriverController::class, 'cancelOrder']);
-        Route::post('/orders/{order}/confirm-cash', [DriverController::class, 'confirmCashPayment']);
-
-        Route::get('/dashboard', [DriverController::class, 'dashboard']);
-
-        Route::patch('/availability', [DriverController::class, 'updateAvailability']);
-
-        Route::post('/orders/{order}/accept', [DriverController::class, 'acceptOrder']);
-
-        Route::post('/orders/{order}/reject', [DriverController::class, 'rejectOrder']);
-
-        Route::post('/orders/{order}/start', [DriverController::class, 'startDelivery']);
-
-        Route::post('/orders/{order}/complete', [DriverController::class, 'completeDelivery']);
-
-        Route::get('/orders/{order}', [DriverController::class, 'getOrderDetails']);
-
-        Route::get('/profile', [DriverController::class, 'getProfile']);
-
-        Route::put('/profile', [DriverController::class, 'updateProfile']);
-
-        Route::get('/history', [DriverController::class, 'getDeliveryHistory']);
+    // ========== CUSTOMER ==========
+    Route::prefix('customer')->group(function () {
+        Route::get('/dashboard', [CustomerController::class, 'dashboard']);
+        Route::get('/profile', [CustomerController::class, 'show']);
+        Route::put('/profile', [CustomerController::class, 'update']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Payment Routes
-    |--------------------------------------------------------------------------
-    */
+    // ========== DRIVER ==========
+    Route::prefix('driver')->group(function () {
+        Route::get('/dashboard', [DriverController::class, 'dashboard']);
+        Route::patch('/availability', [DriverController::class, 'updateAvailability']);
+        Route::get('/profile', [DriverController::class, 'getProfile']);
+        Route::put('/profile', [DriverController::class, 'updateProfile']);
+        Route::get('/history', [DriverController::class, 'getDeliveryHistory']);
 
+        // Order actions
+        Route::post('/orders/{order}/accept', [DriverController::class, 'acceptOrder']);
+        Route::post('/orders/{order}/reject', [DriverController::class, 'rejectOrder']);
+        Route::post('/orders/{order}/start', [DriverController::class, 'startDelivery']);
+        Route::post('/orders/{order}/complete', [DriverController::class, 'completeDelivery']);
+        Route::post('/orders/{order}/cancel', [DriverController::class, 'cancelOrder']);
+        Route::post('/orders/{order}/confirm-cash', [DriverController::class, 'confirmCashPayment']);
+        Route::get('/orders/{order}', [DriverController::class, 'getOrderDetails']);
+    });
+
+    // ========== ORDERS ==========
+    Route::prefix('orders')->group(function () {
+        Route::post('/', [OrderController::class, 'store']);
+        Route::get('/{order}', [OrderController::class, 'show']);  // ✅ هذا الroute المفقود
+        Route::put('/{order}', [OrderController::class, 'update']);
+        Route::delete('/{order}', [OrderController::class, 'destroy']);
+        Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
+    });
+
+    // User orders (customer)
+    Route::get('/user/{id}/orders', [OrderController::class, 'userOrders']);
+
+    // Provider orders
+    Route::get('/provider/{id}/orders', [OrderController::class, 'providerOrders']);
+
+    // ========== PAYMENTS ==========
     Route::prefix('payments')->group(function () {
-
         Route::post('/orders/{order}/cod', [PaymentController::class, 'payOnDelivery']);
-
         Route::get('/orders/{order}/status', [PaymentController::class, 'getPaymentStatus']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Review Routes
-    |--------------------------------------------------------------------------
-    */
-
+    // ========== REVIEWS ==========
     Route::prefix('reviews')->group(function () {
-
-        Route::post('/orders/{order}', [ReviewController::class, 'store']);
-
-        Route::get('/driver', [ReviewController::class, 'getDriverReviews']);
+        Route::post('/', [ReviewController::class, 'store']);  // ✅ POST /api/reviews
+        Route::get('/driver', [ReviewController::class, 'driverReviews']);
+        Route::get('/provider', [ReviewController::class, 'providerReviews']);
+        Route::get('/provider/rating', [ReviewController::class, 'providerRating']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Notification Routes
-    |--------------------------------------------------------------------------
-    */
-
+    // ========== NOTIFICATIONS ==========
     Route::prefix('notifications')->group(function () {
-
-        // جميع الإشعارات
         Route::get('/', [NotificationController::class, 'index']);
-
-        // عدد غير المقروء
         Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
-
-        // إنشاء إشعار
-        Route::post('/', [NotificationController::class, 'store']);
-
-        // تعليم إشعار كمقروء
         Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
-
-        // تعليم الكل كمقروء
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
-
-        // حذف إشعار
-        Route::delete('/{notification}', [NotificationController::class, 'destroy']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Orders
-    |--------------------------------------------------------------------------
-    */
-// osama
-    // Route::get('/user/{id}/orders', [OrderController::class, 'userOrders']);
-
-    // Route::get('/orders', [OrderController::class, 'index']);
-
-    // Route::post('/orders', [OrderController::class, 'store']);
-
-    // Route::get('/orders/{order}', [OrderController::class, 'show']);
-
-    // Route::put('/orders/{id}', [OrderController::class, 'update']);
-
-    // Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Providers
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/provider/{id}/orders', [OrderController::class, 'providerOrders']);
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Favorites
-    |--------------------------------------------------------------------------
-    */
-
+    // ========== FAVORITES ==========
     Route::get('/favorites', [CustomerController::class, 'favorites']);
-
     Route::post('/favorites/{provider}', [CustomerController::class, 'toggleFavorite']);
-});
 
-
-// ------------------
-
-
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Auth Routes (بدون حماية)
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('auth')->group(function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login',    [AuthController::class, 'login']);
+    // ========== PROVIDER DASHBOARD ==========
+    Route::prefix('provider')->group(function () {
+        Route::get('/dashboard/stats', [ProviderDashboardController::class, 'stats']);
+        Route::get('/dashboard/recent-orders', [ProviderDashboardController::class, 'recentOrders']);
+        Route::get('/dashboard/all-orders', [ProviderDashboardController::class, 'allOrders']);
+        Route::get('/my-products', [ProductController::class, 'myProducts']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+        Route::put('/orders/{id}/status', [OrderController::class, 'updateProviderOrderStatus']);
+        Route::get('/reviews', [ReviewController::class, 'providerReviews']);
+        Route::get('/rating', [ReviewController::class, 'providerRating']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Protected Routes (تتطلب JWT Token)
-    |--------------------------------------------------------------------------
-    */
-    // Route::middleware('auth:api')->group(function () {
+    // ========== MY PROVIDER ==========
+    Route::get('/providers/me', [ProviderController::class, 'getMyProvider']);
+    Route::put('/providers/{id}', [ProviderController::class, 'update']);
 
-    //     // Auth
-    //     Route::prefix('auth')->group(function () {
-    //         Route::post('/logout',          [AuthController::class, 'logout']);
-    //         Route::get('/profile',          [AuthController::class, 'profile']);
-    //         Route::put('/profile',          [AuthController::class, 'updateProfile']);
-    //         Route::post('/refresh',         [AuthController::class, 'refresh']);
-    //     });
+    // ========== ADMIN ROUTES (commented for now) ==========
 
-    //     // Customers
-    //     Route::prefix('customers')->group(function () {
-    //         Route::get('/',                  [CustomerController::class, 'index']);
-    //         Route::post('/',                 [CustomerController::class, 'store']);
-    //         Route::get('/{id}',              [CustomerController::class, 'show']);
-    //         Route::put('/{id}',              [CustomerController::class, 'update']);
-    //         Route::delete('/{id}',           [CustomerController::class, 'destroy']);
-    //         Route::put('/{id}/restore',      [CustomerController::class, 'restore']);
-    //     });
+    Route::middleware(['auth:api', 'admin'])->group(function () {
 
-    //     // Drivers
-    //     Route::prefix('drivers')->group(function () {
-    //         Route::get('/',                       [DriverController::class, 'index']);
-    //         Route::get('/available',              [DriverController::class, 'available']);
-    //         Route::post('/',                      [DriverController::class, 'store']);
-    //         Route::get('/{id}',                   [DriverController::class, 'show']);
-    //         Route::put('/{id}',                   [DriverController::class, 'update']);
-    //         Route::delete('/{id}',                [DriverController::class, 'destroy']);
-    //         Route::patch('/{id}/availability',    [DriverController::class, 'toggleAvailability']);
-    //     });
+        // المستخدمين
+        Route::get('/customers',     [AdminController::class, 'getCustomers']);
 
-    //     // Providers
-    //     Route::prefix('providers')->group(function () {
-    //         Route::get('/',               [ProviderController::class, 'index']);
-    //         Route::post('/',              [ProviderController::class, 'store']);
-    //         Route::get('/{id}',           [ProviderController::class, 'show']);
-    //         Route::put('/{id}',           [ProviderController::class, 'update']);
-    //         Route::delete('/{id}',        [ProviderController::class, 'destroy']);
-    //         Route::get('/{id}/products',  [ProviderController::class, 'products']);
-    //     });
+        Route::put('/users/{id}',    [AdminController::class, 'updateUser']);
+        Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
 
-    //     // Products
-    //     Route::prefix('products')->group(function () {
-    //         Route::get('/',        [ProductController::class, 'index']);
-    //         Route::post('/',       [ProductController::class, 'store']);
-    //         Route::get('/{id}',    [ProductController::class, 'show']);
-    //         Route::put('/{id}',    [ProductController::class, 'update']);
-    //         Route::delete('/{id}', [ProductController::class, 'destroy']);
-    //     });
-
-    //     // Orders
-    //     Route::prefix('orders')->group(function () {
-    //         Route::get('/',                       [OrderController::class, 'index']);
-    //         Route::post('/',                      [OrderController::class, 'store']);
-    //         Route::get('/statuses',               [OrderController::class, 'statuses']);
-    //         Route::get('/{id}',                   [OrderController::class, 'show']);
-    //         Route::put('/{id}',                   [OrderController::class, 'update']);
-    //         Route::delete('/{id}',                [OrderController::class, 'destroy']);
-    //         Route::get('/user/{userId}',          [OrderController::class, 'userOrders']);
-    //         Route::get('/provider/{providerId}',  [OrderController::class, 'providerOrders']);
-    //     });
-
-    //     // Payments
-    //     Route::prefix('payments')->group(function () {
-    //         Route::get('/',                      [PaymentController::class, 'index']);
-    //         Route::post('/',                     [PaymentController::class, 'store']);
-    //         Route::get('/{id}',                  [PaymentController::class, 'show']);
-    //         Route::get('/order/{orderId}',       [PaymentController::class, 'orderPayment']);
-    //         Route::get('/user/{userId}',         [PaymentController::class, 'userPayments']);
-    //     });
-
-    //     // Reviews
-    //     Route::prefix('reviews')->group(function () {
-    //         Route::get('/',                         [ReviewController::class, 'index']);
-    //         Route::post('/',                        [ReviewController::class, 'store']);
-    //         Route::get('/{id}',                     [ReviewController::class, 'show']);
-    //         Route::put('/{id}',                     [ReviewController::class, 'update']);
-    //         Route::delete('/{id}',                  [ReviewController::class, 'destroy']);
-    //         Route::get('/provider/{providerId}',    [ReviewController::class, 'providerReviews']);
-    //     });
-    // });
-
-
-    Route::middleware('auth:sanctum')->group(function () {
-
-        Route::prefix('customers')->group(function () {
-            Route::get('/', [CustomerController::class, 'index']);
-            Route::post('/{id}', [CustomerController::class, 'update']);
-            Route::post('/', [CustomerController::class, 'store']);
-            Route::get('/{id}', [CustomerController::class, 'show']);
-            Route::put('/{id}', [CustomerController::class, 'update']);
-            Route::delete('/{id}', [CustomerController::class, 'destroy']);
-        });
-
-    });
-
-    Route::prefix('auth')->group(function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::post('/logout', [AuthController::class, 'logout']);
-            Route::get('/me', [AuthController::class, 'me']);
-            Route::get('/providers/me', [ProviderController::class, 'getMyProvider']);
-            Route::put('/providers/{id}', [ProviderController::class, 'update']);
-        });
-    });
-
-
-
-Route::prefix('auth')->group(function () {
-    Route::post('register',        [AuthController::class, 'register']);
-    Route::post('login',           [AuthController::class, 'login']);
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('reset-password',  [AuthController::class, 'resetPassword']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('me',      [AuthController::class, 'me']);
+        // الطلبات
+        Route::get('/orders',           [AdminController::class, 'getOrders']);
+        Route::put('/orders/{id}',      [AdminController::class, 'updateOrder']);
+        Route::delete('/orders/{id}',   [AdminController::class, 'deleteOrder']);
+        Route::match(['put', 'post'], '/admin/profile', [AdminController::class, 'updateAdminProfile']);
     });
 });
 
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'API WORKING'
-    ]);
-});
-Route::middleware('auth:sanctum')->get('/customer/dashboard', [CustomerController::class, 'dashboard']);
-
-
-
-Route::get('/orders', [OrderController::class, 'index']);          // عرض كل الطلبات
-Route::post('/orders', [OrderController::class, 'store']);
-Route::post('/orders/preview', [OrderController::class, 'preview']);      // إنشاء طلب
-// Route::get('/orders/{id}', [OrderController::class, 'show']);      // عرض طلب واحد
-Route::put('/orders/{id}', [OrderController::class, 'update']);    // تحديث الطلب
-Route::delete('/orders/{id}', [OrderController::class, 'destroy']); // حذف الطلب
-
-
-
-Route::get('/drivers/available', function () {
-    return Driver::where('is_available', true)->with('user')->get();
-});
-
-
-//حسب المستخدم
-Route::get('/user/{id}/orders', [OrderController::class, 'userOrders']);
-
-//حسب المتجر
-Route::get('/provider/{id}/orders', [OrderController::class, 'providerOrders']);
-
-Route::get('/statuses', [OrderController::class, 'statuses']);
-
-
-
-Route::get('/drivers/available', [DriverController::class, 'available']);
-
-Route::get('/v1/drivers',    [AdminController::class, 'getDrivers']);
-
-
+// ========== V1 API Routes (Backward Compatibility) ==========
 Route::prefix('v1')->group(function () {
-
-    // ── Users ──────────────────────────────────────────────────
-    Route::get('users/{user}', [CustomerController::class, 'show']);
-
-    // ── Providers → Products ───────────────────────────────────
+    Route::get('drivers', [DriverController::class, 'index']);
+    Route::get('drivers/available', [DriverController::class, 'available']);
     Route::get('providers/{provider}/products', [ProductController::class, 'byProvider']);
-
-    // ── Drivers ────────────────────────────────────────────────
-    Route::get('drivers',           [DriverController::class, 'index']);          // all drivers
-    Route::get('drivers/available', [DriverController::class, 'available']);      // only available
-
-    // ── Orders ─────────────────────────────────────────────────
-    Route::post('orders',            [OrderController::class, 'store']);
-    Route::get('orders/{order}',     [OrderController::class, 'show']);
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::get('users/{user}', [CustomerController::class, 'show']);
 });
-
-Route::get('providers',        [ProviderController::class, 'index']);   // يدعم ?search= و ?type=
-Route::get('providers/stats',  [ProviderController::class, 'stats']);   // إحصائيات سريعة
-
-
-Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
-    // الإحصائيات والطلبات
-    Route::get('/dashboard/stats', [ProviderDashboardController::class, 'stats']);
-    Route::get('/dashboard/recent-orders', [ProviderDashboardController::class, 'recentOrders']);
-    Route::get('/dashboard/all-orders', [ProviderDashboardController::class, 'allOrders']);
-
-    // المنتجات (إدارة المنتجات الخاصة بالتاجر)
-    Route::get('/my-products', [ProductController::class, 'myProducts']);
-    Route::post('/products', [ProductController::class, 'store']);
-    Route::put('/products/{id}', [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-
-    // تحديث حالة الطلب
-    Route::put('/orders/{id}/status', [OrderController::class, 'updateProviderOrderStatus']);
-
-    // التقييمات
-    Route::get('/reviews', [ReviewController::class, 'providerReviews']);
-    Route::get('/rating', [ReviewController::class, 'providerRating']);
-});
-
-
-Route::middleware(['auth:api', 'admin'])->group(function () {
-
-    // المستخدمين
-    Route::get('/customers',     [AdminController::class, 'getCustomers']);
-
-    Route::put('/users/{id}',    [AdminController::class, 'updateUser']);
-    Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
-
-    // الطلبات
-    Route::get('/orders',           [AdminController::class, 'getOrders']);
-    Route::put('/orders/{id}',      [AdminController::class, 'updateOrder']);
-    Route::delete('/orders/{id}',   [AdminController::class, 'deleteOrder']);
-    Route::match(['put', 'post'], '/admin/profile', [AdminController::class, 'updateAdminProfile']);
-});
-
-
-Route::post('reviews', [ReviewController::class, 'store']);
-
-// تقييمات السائق
-Route::get('driver/reviews', [ReviewController::class, 'driverReviews']);
-

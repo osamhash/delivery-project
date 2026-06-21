@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
 {
     Schema::table('orders', function (Blueprint $table) {
-        $table->renameColumn('payment_status', 'payment_method');
+        $table->enum('payment_status', ['pending', 'paid'])
+              ->default('pending')
+              ->after('payment_method');
     });
 }
 
 public function down(): void
 {
     Schema::table('orders', function (Blueprint $table) {
-        $table->renameColumn('payment_method', 'payment_status');
+        $table->dropColumn('payment_status');
     });
 }
 };

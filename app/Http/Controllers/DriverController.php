@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class DriverController extends Controller
 {
@@ -85,7 +86,6 @@ class DriverController extends Controller
         $rating       = $this->getDriverRating($driver->id);
         $totalReviews = $this->getTotalReviews($driver->id);
 
-        // كمية الطلبات التي تحتاج دفع كاش (مكتملة ولم تُدفع)
         $pendingCashOrders = Order::where('driver_id', $driver->id)
             ->where('status_id', $completedStatusId)
             ->where('payment_method', 'Pending')
@@ -194,10 +194,7 @@ class DriverController extends Controller
     }
 
     // ─── Cancel Order (while OnTheWay) ──────────────────────
-    /**
-     * POST /api/v1/driver/orders/{order}/cancel
-     * السائق يلغي الطلب أثناء التوصيل
-     */
+
     public function cancelOrder(Request $request, Order $order)
     {
         $request->validate([
@@ -207,13 +204,12 @@ class DriverController extends Controller
         $driver          = Auth::user()->driver;
         $acceptedStatusId = OrderStatus::where('name', 'Accepted')->value('id');
         $onTheWayStatusId = OrderStatus::where('name', 'OnTheWay')->value('id');
-        $cancelledStatusId = OrderStatus::where('name', 'cancelled')->value('id');
+        $cancelledStatusId = OrderStatus::where('name', 'Rejected')->value('id');
 
         if ($order->driver_id !== $driver->id) {
             return response()->json(['message' => 'غير مصرح'], 403);
         }
 
-        // يمكن الإلغاء فقط إذا كان الطلب مقبولاً أو في الطريق
         if (!in_array($order->status_id, [$acceptedStatusId, $onTheWayStatusId])) {
             return response()->json(['message' => 'لا يمكن إلغاء هذا الطلب في وضعه الحالي'], 400);
         }
@@ -227,7 +223,6 @@ class DriverController extends Controller
             $driver->is_available = true;
             $driver->save();
 
-            // إشعار الزبون
             Notification::create([
                 'user_id' => $order->user_id,
                 'title'   => '🚫 تم إلغاء طلبك',
@@ -236,7 +231,6 @@ class DriverController extends Controller
                 'data'    => ['order_id' => $order->id, 'reason' => $request->reason],
             ]);
 
-            // إشعار المتجر أيضاً
             if ($order->provider && $order->provider->user_id) {
                 Notification::create([
                     'user_id' => $order->provider->user_id,
@@ -307,10 +301,7 @@ class DriverController extends Controller
     }
 
     // ─── Confirm Cash Payment ─────────────────────────────────
-    /**
-     * POST /api/v1/driver/orders/{order}/confirm-cash
-     * السائق يؤكد استلام المبلغ كاش
-     */
+
     public function confirmCashPayment(Order $order)
     {
         $driver            = Auth::user()->driver;
@@ -331,7 +322,6 @@ class DriverController extends Controller
         DB::transaction(function () use ($order) {
             $order->update(['payment_method' => 'paid']);
 
-            // إشعار الزبون بتأكيد الدفع
             Notification::create([
                 'user_id' => $order->user_id,
                 'title'   => '💰 تم تأكيد الدفع',
@@ -340,7 +330,6 @@ class DriverController extends Controller
                 'data'    => ['order_id' => $order->id],
             ]);
 
-            // إشعار المتجر
             if ($order->provider && $order->provider->user_id) {
                 Notification::create([
                     'user_id' => $order->provider->user_id,
@@ -480,16 +469,47 @@ class DriverController extends Controller
 
     // ─── All / Available Drivers ──────────────────────────────
 
-    public static function index(): AnonymousResourceCollection
+    // ✅ تم تعديل هذه الدالة لجلب البيانات كـ array بدلاً من Resource
+    public static function index()
     {
-        $drivers = Driver::with('user')->get();
-        return DriverResource::collection($drivers);
+        try {
+            $drivers = Driver::with('user')->get();
+
+            Log::info('Drivers fetched via index:', ['count' => $drivers->count()]);
+
+            // إعادة البيانات مباشرة بدون Resource
+            return response()->json([
+                'status' => true,
+                'data' => $drivers
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in DriverController index: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في جلب بيانات السائقين',
+                'data' => []
+            ], 500);
+        }
     }
 
-    public function available(): AnonymousResourceCollection
+    // ✅ تم تعديل هذه الدالة لجلب البيانات كـ array بدلاً من Resource
+    public function available()
     {
-        $drivers = Driver::with('user')->where('is_available', true)->get();
-        return DriverResource::collection($drivers);
+        try {
+            $drivers = Driver::with('user')->where('is_available', true)->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $drivers
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in DriverController available: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في جلب بيانات السائقين المتاحين',
+                'data' => []
+            ], 500);
+        }
     }
 
     public function availableDrivers()

@@ -4,183 +4,230 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Provider;
-use App\Http\Requests\CustomerRequest;
-use App\Http\Requests\ProviderRequest;
-use App\Http\Resources\ProviderResource;
-use App\Models\Role;
-use App\Models\User;
-use GuzzleHttp\Handler\Proxy;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
-class ProviderController extends Controller
+class ProductController extends Controller
 {
-
-    public function products($id, Request $request)
+    // جلب منتجات المتجر
+    public function byProvider($providerId)
     {
-        $query = Product::where('provider_id', $id);
-        if ($request->type) {
-            $query->where('type', $request->type);
-        }
-        if ($request->min_price) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->max_price) {
-            $query->where('price', '<=', $request->max_price);
-        }
-        return $query->get();
-    }
+        try {
+            $products = Product::where('provider_id', $providerId)->get();
 
+            // ✅ إضافة رابط الصورة
+            $products->each(function ($product) {
+                if ($product->image_path) {
+                    $product->image_url = asset('storage/' . $product->image_path);
+                }
+            });
 
-    // list All Provider
-   public function index()
-{
-    $providers = Provider::with('user')->get();
-
-    foreach ($providers as $provider) {
-        if ($provider->user && $provider->user->image_path) {
-            $provider->user->image_url = asset('storage/' . $provider->user->image_path);
-        } else {
-            $provider->user->image_url = null;
+            return response()->json([
+                'status' => true,
+                'data' => $products
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching products: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في جلب المنتجات'
+            ], 500);
         }
     }
 
-    return response()->json($providers);
-}
-/**
-     * GET /api/providers
-     * Supports: ?search=, ?type=, ?per_page=
-     */
-    // public function index(ProviderRequest $request)
-    // {
-    //     $query = Provider::with(['user', 'products'])
-    //         ->withCount('orders');                    // عدد الطلبات لكل provider
+    // جلب منتجاتي (للمتجر)
+    public function myProducts(Request $request)
+    {
+        try {
+            $provider = $request->user()->provider;
+            if (!$provider) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لم يتم العثور على متجر'
+                ], 404);
+            }
 
-    //     // ── بحث بالاسم أو النوع ──────────────────────────────
-    //     if ($search = $request->search) {
-    //         $query->where(function ($q) use ($search) {
-    //             $q->where('type', 'like', "%{$search}%")
-    //               ->orWhereHas('user', function ($u) use ($search) {
-    //                   $u->where('first_name', 'like', "%{$search}%")
-    //                     ->orWhere('last_name',  'like', "%{$search}%");
-    //               });
-    //         });
-    //     }
+            $products = Product::where('provider_id', $provider->id)->get();
 
-    //     // ── فلتر بالنوع ───────────────────────────────────────
-    //     if ($type = $request->type) {
-    //         $query->where('type', $type);
-    //     }
+            // ✅ إضافة رابط الصورة
+            $products->each(function ($product) {
+                if ($product->image_path) {
+                    $product->image_url = asset('storage/' . $product->image_path);
+                }
+            });
 
-    //     $providers = $query->latest()->get();
-    //     $r = ProviderResource::collection($providers);
-    //     return $r;
-    // }
-
-    // Show create form
-    public function create() {
-        return view('providers.create');
+            return response()->json([
+                'status' => true,
+                'data' => $products
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching my products: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في جلب المنتجات'
+            ], 500);
+        }
     }
 
-    // Store new customer
-    public function store(Request $request) {
-        // $request->validate([
-        //     'first_name'=>'required',
-        //     'last_name'=>'required',
-        //     'email'=>'required|email|unique:users',
-        //     // 'password'=>'required|min:6',
-        // ]);
+    // ✅ إضافة منتج جديد مع صورة
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'type' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:255',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            ]);
 
-        $providerRole = Role::where('name','provider')->first();
+            $provider = $request->user()->provider;
+            if (!$provider) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لم يتم العثور على متجر'
+                ], 404);
+            }
 
-        User::create([
-            'first_name'=>$request->first_name,
-            'second_name'=>$request->second_name,
-            'last_name'=>$request->last_name,
-            'email'=>$request->email,
-            'password'=>bcrypt($request->password),
-            'role_id'=>$providerRole->id,
-            'phone'=>$request->phone,
-        ]);
+            $product = new Product();
+            $product->provider_id = $provider->id;
+            $product->type = $request->type;
+            $product->price = $request->price;
+            $product->description = $request->description;
 
-        dd();
-        //الحين كيف بدنا انجيب ال user_id  الخاص ب ال  new User
-        // $user_id = User::id;
-        Provider::create([
-            'user_id'=>$user_id,
-            'type'=>$request->type,
-        ]);
+            // ✅ معالجة الصورة - تخزين في products/
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
 
-        return redirect()->route('providers.index')->with('success','providers created successfully!');
+                // تخزين في storage/app/public/products
+                $path = $image->storeAs('products', $imageName, 'public');
+
+                if ($path) {
+                    // ✅ حفظ المسار في قاعدة البيانات بصيغة products/اسم_الصورة
+                    $product->image_path = $path;
+                }
+            }
+
+            $product->save();
+
+            // ✅ إضافة رابط الصورة للرد
+            $product->image_url = $product->image_path ? asset('storage/' . $product->image_path) : null;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'تم إضافة المنتج بنجاح',
+                'data' => $product
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Error creating product: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في إضافة المنتج: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function show($id){
-        $provider = Provider::with('user')->where('id',$id)->firstOrFail();
-        dd($provider->toArray());
-        return view('providers.index', compact('provider'));
-    }
-
-
-    public function edit($id){
-    $provider = Provider::join('users', 'providers.user_id', '=', 'users.id')
-        ->select('providers.*',
-        'users.first_name',
-        'users.second_name',
-        'users.last_name',
-        'users.email',
-        'users.phone',
-        'users.role_id',
-        'users.address',
-        'users.date_of_birth')->first();
-        return view('providers.edit',compact('provider'));
-    }
-
+    // ✅ تحديث منتج مع صورة
     public function update(Request $request, $id)
     {
-        // التحقق من صحة البيانات
-        $request->validate([
-            'type' => 'required|string|max:100',
-        ]);
+        try {
+            $request->validate([
+                'type' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:255',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            ]);
 
-        // جلب الـ provider
-        $provider = Provider::findOrFail($id);
+            $product = Product::find($id);
+            if (!$product) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'المنتج غير موجود'
+                ], 404);
+            }
 
-        // التحقق من أن المستخدم الحالي هو صاحب هذا المتجر
-        if ($provider->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'غير مصرح لك بتعديل هذا المتجر'], 403);
+            $provider = $request->user()->provider;
+            if (!$provider || $product->provider_id !== $provider->id) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'غير مصرح لك بتعديل هذا المنتج'
+                ], 403);
+            }
+
+            $product->type = $request->type;
+            $product->price = $request->price;
+            $product->description = $request->description;
+
+            // ✅ معالجة الصورة الجديدة
+            if ($request->hasFile('image')) {
+                // حذف الصورة القديمة
+                if ($product->image_path && Storage::disk('public')->exists($product->image_path)) {
+                    Storage::disk('public')->delete($product->image_path);
+                }
+
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                // تخزين في storage/app/public/products
+                $path = $image->storeAs('products', $imageName, 'public');
+
+                if ($path) {
+                    $product->image_path = $path;
+                }
+            }
+
+            $product->save();
+
+            // ✅ إضافة رابط الصورة للرد
+            $product->image_url = $product->image_path ? asset('storage/' . $product->image_path) : null;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'تم تحديث المنتج بنجاح',
+                'data' => $product
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating product: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في تحديث المنتج: ' . $e->getMessage()
+            ], 500);
         }
-
-        // تحديث نوع المتجر فقط
-        $provider->update([
-            'type' => $request->type
-        ]);
-
-        return response()->json([
-            'message' => 'تم تحديث بيانات المتجر بنجاح',
-            'provider' => $provider
-        ]);
     }
 
-    public function destroy($id){
-        dd($id);
-        $provider = Provider::findOrFail($id);
-        dd($provider->first_name);
-        $provider->delete();
-
-        return redirect()->route('providers.index')->with('success','Provider Deleted successfully!');
-
-    }
-
-    // public function dashboard(Request $request):View{
-    //     return view('dashboard');
-    // }
-
-    public function getMyProvider(Request $request)
+    // ✅ حذف منتج مع الصورة
+    public function destroy($id)
     {
-        $provider = $request->user()->provider;
-        if (!$provider) {
-            return response()->json(['message' => 'No provider found'], 404);
+        try {
+            $product = Product::find($id);
+            if (!$product) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'المنتج غير موجود'
+                ], 404);
+            }
+
+            // حذف الصورة من التخزين
+            if ($product->image_path && Storage::disk('public')->exists($product->image_path)) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+
+            $product->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'تم حذف المنتج بنجاح'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting product: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'فشل في حذف المنتج'
+            ], 500);
         }
-        return response()->json([$provider->load('user')]);
     }
 }
