@@ -276,16 +276,16 @@ import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import '../assets/styles/CreateOrder.css'
 
-// ─── Route ───────────────────────────────────────────
+// ─── Route 
 const route      = useRoute()
 const providerId = computed(() => route.params.id)
 
-// ─── Auth ─────────────────────────────────────────────
+// ─── Auth 
 function getToken() {
   return localStorage.getItem('token') ?? ''
 }
 
-// ─── State ───────────────────────────────────────────
+// ─── State 
 const customerId     = ref(null)   // ← سيُملأ من /api/auth/me
 const customer       = ref(null)
 const products       = ref([])

@@ -2,11 +2,11 @@
     
     <pre >{{ products }}</pre>
   <div class="app-shell" dir="rtl">
-    <!-- ░░ Background layers ░░ -->
+    <!--  Background layers  -->
     <div class="bg-mesh"></div>
     <div class="bg-grid"></div>
 
-    <!-- ░░ Header ░░ -->
+    <!--  Header  -->
     <header class="top-bar">
       <div class="top-bar-inner">
         <div class="brand">
@@ -118,7 +118,7 @@
       </div>
     </main>
 
-    <!-- ░░ Floating Cart Button ░░ -->
+    <!--  Floating Cart Button  -->
     <transition name="bounce">
       <button v-if="totalQty > 0" class="cart-fab" @click="showCheckout = true">
         <span class="fab-icon">🛍️</span>
@@ -128,8 +128,7 @@
       </button>
     </transition>
 
-    <!-- ░░ Checkout Modal ░░ -->
-    <!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+    <!--  Checkout Modal  -->
     <transition name="modal">
       <div class="modal-overlay" v-if="showCheckout" @click.self="showCheckout = false">
         <div class="modal-sheet">
@@ -253,7 +252,7 @@
       </div>
     </transition>
 
-    <!-- ░░ Success Toast ░░ -->
+    <!--  Success Toast  -->
     <transition name="toast">
       <div class="toast success-toast" v-if="successMsg">
         <span>✅</span>
@@ -267,12 +266,12 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-// ─── Route ───────────────────────────────────────────
+// ─── Route 
 const route = useRoute()
 const providerId = computed(() => route.params.id)
 const customerId = 3
 
-// ─── State ───────────────────────────────────────────
+// ─── State 
 const customer      = ref(null)
 const products      = ref([])
 const drivers       = ref([])
@@ -287,7 +286,7 @@ const selectedPayment = ref('')
 const isSubmitting  = ref(false)
 const successMsg    = ref('')
 
-// ─── Data ───────────────────────────────────────────
+// ─── Data 
 const categories = [
   { value: 'all', label: 'الكل', icon: '✨' },
   { value: 'food', label: 'Food', icon: '🍽️' },
@@ -302,7 +301,7 @@ const paymentMethods = [
   { value: 'stc_pay',   label: 'STC Pay',   icon: '📱' },
 ]
 
-// ─── Computed ─────────────────────────────────────────
+// ─── Computed 
 const filteredProducts = computed(() => {
   let list = [...products.value]
 
@@ -334,7 +333,7 @@ const canConfirm = computed(() =>
   cartItems.value.length > 0 && selectedDriver.value && selectedPayment.value
 )
 
-// ─── Methods ──────────────────────────────────────────
+// ─── Methods ─
 function categoryEmoji(type) {
   const map = { 'مشروبات': '🧃', 'أطعمة': '🍛', 'حلويات': '🍮' }
   return map[type] || '📦'
@@ -396,7 +395,7 @@ async function submitOrder() {
   }
 }
 
-// ─── Load Data ─────────────────────────────────────────
+// ─── Load Data 
 onMounted(async () => {
   try {
     const userRes = await fetch(`/api/users/${customerId}`)
@@ -419,10 +418,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ─── Google Fonts ──────────────────────────────── */
+/* ─── Google Fonts  */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@400;600;700;900&display=swap');
 
-/* ─── CSS Variables ─────────────────────────────── */
+/* ─── CSS Variables  */
 .app-shell {
   --bg:        #060b14;
   --surface:   #0d1626;
@@ -462,7 +461,7 @@ onMounted(async () => {
   background-size: 48px 48px;
 }
 
-/* ─── Top Bar ───────────────────────────────────── */
+/* ─── Top Bar ───── */
 .top-bar {
   position: sticky; top: 0; z-index: 100;
   background: rgba(6,11,20,.85);
@@ -499,14 +498,14 @@ onMounted(async () => {
 .customer-name { font-size: 13px; font-weight: 700; color: var(--text); }
 .customer-label { font-size: 10px; color: var(--accent); }
 
-/* ─── Main Content ──────────────────────────────── */
+/* ─── Main Content  */
 .main-content {
   position: relative; z-index: 1;
   max-width: 1200px; margin: 0 auto;
   padding: 28px 24px 120px;
 }
 
-/* ─── Controls Bar ──────────────────────────────── */
+/* ─── Controls Bar  */
 .controls-bar {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 16px;
@@ -549,7 +548,7 @@ onMounted(async () => {
   background: rgba(56,189,248,.1); padding: 2px 8px; border-radius: 20px;
 }
 
-/* ─── Products Grid ─────────────────────────────── */
+/* ─── Products Grid  */
 .products-grid { position: relative; }
 .grid-inner {
   display: grid;
@@ -610,7 +609,7 @@ onMounted(async () => {
 }
 .product-price em { font-size: 12px; font-style: normal; color: var(--text-muted); }
 
-/* ─── Qty Control ───────────────────────────────── */
+/* ─── Qty Control ─ */
 .qty-control {
   display: flex; align-items: center; gap: 10px;
 }
@@ -637,7 +636,7 @@ onMounted(async () => {
   min-width: 20px; text-align: center;
 }
 
-/* ─── Empty State ───────────────────────────────── */
+/* ─── Empty State ─ */
 .empty-state {
   grid-column: 1/-1; text-align: center; padding: 64px 24px;
   color: var(--text-muted);
@@ -666,7 +665,7 @@ onMounted(async () => {
 }
 .fab-price { font-size: 14px; }
 
-/* ─── Modal ─────────────────────────────────────── */
+/* ─── Modal ─────── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 300;
   background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
@@ -704,7 +703,7 @@ onMounted(async () => {
 
 .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 24px; }
 
-/* ─── Receipt ───────────────────────────────────── */
+/* ─── Receipt ───── */
 .receipt-section { display: flex; flex-direction: column; gap: 12px; }
 .section-label {
   font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
@@ -733,7 +732,7 @@ onMounted(async () => {
 .total-amount { font-size: 22px; font-weight: 900; color: var(--accent); font-family: 'Cairo', sans-serif; }
 .total-amount em { font-size: 13px; font-style: normal; color: var(--text-muted); }
 
-/* ─── Drivers ───────────────────────────────────── */
+/* ─── Drivers ───── */
 .drivers-list { display: flex; flex-direction: column; gap: 8px; }
 .driver-card {
   display: flex; align-items: center; gap: 12px;
@@ -784,7 +783,7 @@ onMounted(async () => {
   box-shadow: 0 4px 20px rgba(56,189,248,.15);
 }
 
-/* ─── Modal Footer ──────────────────────────────── */
+/* ─── Modal Footer  */
 .modal-footer {
   padding: 20px 24px;
   border-top: 1px solid var(--border);
@@ -811,7 +810,7 @@ onMounted(async () => {
 .confirm-btn:disabled { opacity: .4; cursor: not-allowed; }
 .confirm-hint { text-align: center; font-size: 12px; color: var(--danger); margin: 8px 0 0; }
 
-/* ─── Spinner ───────────────────────────────────── */
+/* ─── Spinner ───── */
 .spinner {
   display: inline-block; width: 18px; height: 18px;
   border: 2px solid rgba(0,0,0,.2); border-top-color: #0f172a;
@@ -819,7 +818,7 @@ onMounted(async () => {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── Toast ─────────────────────────────────────── */
+/* ─── Toast ─────── */
 .toast {
   position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
   z-index: 500; display: flex; align-items: center; gap: 10px;
@@ -832,7 +831,7 @@ onMounted(async () => {
   border: 1px solid #10b981; color: #6ee7b7;
 }
 
-/* ─── Transitions ───────────────────────────────── */
+/* ─── Transitions ─ */
 .card-enter-active, .card-leave-active { transition: all .35s ease; }
 .card-enter-from { opacity: 0; transform: scale(.9) translateY(20px); }
 .card-leave-to   { opacity: 0; transform: scale(.9); }
@@ -857,12 +856,12 @@ onMounted(async () => {
 .toast-leave-active { transition: all .25s ease; }
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(-50%) translateY(20px); }
 
-/* ─── Scrollbar ─────────────────────────────────── */
+/* ─── Scrollbar ─── */
 .modal-body::-webkit-scrollbar { width: 4px; }
 .modal-body::-webkit-scrollbar-track { background: transparent; }
 .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-/* ─── Responsive ────────────────────────────────── */
+/* ─── Responsive ── */
 @media (max-width: 640px) {
   .main-content { padding: 20px 14px 120px; }
   .controls-bar { flex-direction: column; align-items: flex-start; }

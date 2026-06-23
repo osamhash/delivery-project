@@ -120,7 +120,7 @@
       </main>
     </div>
 
-    <!-- ══════════ REVIEW MODAL ══════════ -->
+    <!--  REVIEW MODAL  -->
     <transition name="fade">
       <div v-if="showReview" class="review-overlay" @click.self="closeReview">
         <div class="review-modal">
@@ -309,7 +309,7 @@
       </div>
     </transition>
 
-    <!-- ══════════ NOTIFICATIONS PANEL ══════════ -->
+    <!--  NOTIFICATIONS PANEL  -->
     <transition name="slide-left">
       <div class="notifications-panel" v-if="showNotifications">
         <div class="panel-header">
@@ -341,7 +341,7 @@
       </div>
     </transition>
 
-    <!-- ══════════ TOAST ══════════ -->
+    <!--  TOAST  -->
     <transition name="toast">
       <div class="toast" :class="toast.type" v-if="toast.show">{{ toast.message }}</div>
     </transition>
@@ -356,7 +356,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// ── State ──────────────────────────────────────────────────
+// ── State 
 const stats        = ref([])
 const orders       = ref([])
 const search       = ref('')
@@ -389,7 +389,7 @@ const selectedDriverTags   = ref([])
 // Toast
 const toast = ref({ show: false, message: '', type: 'success' })
 
-// ── Static Review Data ─────────────────────────────────────
+// ── Static Review Data 
 const ratingLabels = {
   1: 'سيء جداً 😞',
   2: 'سيء 😕',
@@ -400,7 +400,7 @@ const ratingLabels = {
 const providerTags = ['جودة الطعام', 'التغليف', 'الدقة في الطلب', 'السعر المناسب', 'التنوع']
 const driverTags   = ['سرعة التوصيل', 'الأدب والاحترام', 'الدقة في العنوان', 'النظافة']
 
-// ── Helpers ────────────────────────────────────────────────
+// ── Helpers 
 const showToast = (message, type = 'success') => {
   toast.value = { show: true, message, type }
   setTimeout(() => (toast.value.show = false), 3000)
@@ -412,7 +412,7 @@ const toggleTag = (arr, tag) => {
   else arr.splice(idx, 1)
 }
 
-// ── Computed ───────────────────────────────────────────────
+// ── Computed 
 const userName    = computed(() => email.value ? email.value.split('@')[0] : 'صديقنا')
 const roleLabel   = computed(() => 'زبون')
 const headerTitle = computed(() => 'طلباتك ومشترياتك')
@@ -437,13 +437,13 @@ const filteredOrders = computed(() => {
   return result
 })
 
-// ── Sort ───────────────────────────────────────────────────
+// ── Sort 
 const sortBy = (key) => {
   if (sortKey.value === key) sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   else { sortKey.value = key; sortOrder.value = 'asc' }
 }
 
-// ── API: Dashboard ─────────────────────────────────────────
+// ── API: Dashboard 
 const loadDashboard = async () => {
   try {
     const { data } = await api.get('/customer/dashboard')
@@ -458,7 +458,7 @@ const loadDashboard = async () => {
   }
 }
 
-// ── API: Notifications ─────────────────────────────────────
+// ── API: Notifications 
 const loadNotifications = async () => {
   try {
     const [nRes, cRes] = await Promise.all([
@@ -496,7 +496,7 @@ const markAllRead = async () => {
   }
 }
 
-// ── Review ─────────────────────────────────────────────────
+// ── Review 
 const openReview = async (order) => {
   try {
     const { data } = await api.get(`/orders/${order.id}`)
@@ -557,7 +557,7 @@ const submitReview = async () => {
   }
 }
 
-// ── Misc ───────────────────────────────────────────────────
+// ── Misc 
 const getStatusText = (status) =>
   ({ pending: 'معلق', accepted: 'مقبول', on_the_way: 'في الطريق', completed: 'مكتمل', rejected: 'مرفوض', cancelled: 'ملغي' }[status] || status || '—')
 
@@ -582,7 +582,7 @@ const logout = () => {
   router.push('/login')
 }
 
-// ── Lifecycle ──────────────────────────────────────────────
+// ── Lifecycle 
 onMounted(() => {
   loadDashboard()
   loadNotifications()

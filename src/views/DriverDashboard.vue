@@ -257,7 +257,7 @@
       </div>
     </transition>
 
-    <!-- ── ✅ Complete Delivery Modal (جديد) ───────────────── -->
+    <!-- ──  Complete Delivery Modal (جديد) ───────────────── -->
     <transition name="modal">
       <div class="modal-overlay" v-if="completeOrderData" @click.self="completeOrderData = null">
         <div class="modal-content">
@@ -375,7 +375,7 @@ const cashLoading       = ref({})
 const loading           = ref(false)
 const toast             = ref({ show: false, message: '', type: 'success' })
 
-// ✅ State الجديد لـ complete modal
+//  State الجديد لـ complete modal
 const completeOrderData = ref(null)
 const completeLoading   = ref(false)
 
@@ -602,7 +602,7 @@ const confirmComplete = async () => {
   }
 }
 
-// ── Confirm Cash Payment (من الـ alert العلوي) ───────────
+// ── Confirm Cash Payment (من الـ alert العلوي) 
 const confirmCash = async (order) => {
   cashLoading.value = { ...cashLoading.value, [order.id]: true }
   try {
@@ -616,7 +616,7 @@ const confirmCash = async (order) => {
   }
 }
 
-// ── Order Details ─────────────────────────────────────────
+// ── Order Details 
 const viewOrderDetails = async (order) => {
   try {
     const { data } = await api.get(`/driver/orders/${order.id}`)
@@ -627,7 +627,7 @@ const viewOrderDetails = async (order) => {
   }
 }
 
-// ── Notifications ─────────────────────────────────────────
+// ── Notifications 
 const markAsRead = async (notification) => {
   try {
     await api.post(`/notifications/${notification.id}/read`)
@@ -648,7 +648,7 @@ const toggleNotifications = () => {
   }
 }
 
-// ── Helpers ────────────────────────────────────────────────
+// ── Helpers 
 const getProductsList = (products) =>
   products?.length
     ? products.map(p => `${p.type} x${p.pivot?.quantity || 1}`).join('، ')
@@ -677,7 +677,7 @@ const logout = () => {
   router.push('/login')
 }
 
-// ── Lifecycle ──────────────────────────────────────────────
+// ── Lifecycle 
 let interval
 onMounted(() => {
   loadDashboard()
@@ -694,7 +694,7 @@ onUnmounted(() => {
 
 <style scoped>
 
-/* ────────── Order Actions Buttons ────────── */
+/*  Order Actions Buttons \ */
 .order-actions {
   display: flex;
   gap: 10px;
@@ -1030,7 +1030,7 @@ onUnmounted(() => {
 .btn-confirm-green:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
 .btn-confirm-green:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ────────── Details Modal ────────── */
+/*  Details Modal  */
 .details-section { margin-bottom: 20px; }
 .details-section h4 { color:#38bdf8; font-size:15px; font-weight:600; margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); }
 .details-section p { color:#e2e8f0; font-size:14px; margin:6px 0; }
@@ -1038,7 +1038,7 @@ onUnmounted(() => {
 .product-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:14px; color:#e2e8f0; }
 .total-amount { display:flex; justify-content:space-between; padding:12px 0 0; font-size:16px; color:#f59e0b; }
 
-/* ────────── Notifications ────────── */
+/*  Notifications  */
 .notifications-panel {
   position: fixed;
   top: 0;
@@ -1066,7 +1066,7 @@ onUnmounted(() => {
 .empty-notifications { text-align:center; padding:40px; color:#94a3b8; }
 .empty-notifications span { font-size:40px; display:block; margin-bottom:12px; }
 
-/* ────────── Toast ────────── */
+/*  Toast  */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -1082,7 +1082,7 @@ onUnmounted(() => {
 .toast.success { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
 .toast.error   { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
 
-/* ────────── Transitions ────────── */
+/*  Transitions  */
 .modal-enter-active, .modal-leave-active { transition: all 0.3s ease; }
 .modal-enter-from, .modal-leave-to { opacity:0; transform:scale(0.9); }
 

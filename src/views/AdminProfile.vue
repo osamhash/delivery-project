@@ -125,7 +125,7 @@ const successMsg = ref('')
 const errorMsg = ref('')
 const isDark = ref(localStorage.getItem('delivro_theme') === 'dark')
 
-// ✅ صورة افتراضية
+//  صورة افتراضية
 const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150"%3E%3Crect width="150" height="150" fill="%236366f1"/%3E%3Ctext x="75" y="90" font-size="60" text-anchor="middle" fill="white" font-family="Arial"%3E👤%3C/text%3E%3C/svg%3E'
 const avatarPreview = ref('')
 const imageFile = ref(null)
@@ -142,7 +142,7 @@ const form = ref({
   gender: null
 })
 
-// ✅ دالة لبناء رابط الصورة بشكل صحيح
+//  دالة لبناء رابط الصورة بشكل صحيح
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null
   
@@ -151,7 +151,7 @@ const getImageUrl = (imagePath) => {
     return imagePath
   }
   
-  // ✅ بناء الرابط من storage
+  //  بناء الرابط من storage
   const baseUrl = import.meta.env.VITE_APP_URL || 'http://localhost:8000'
   // إزالة أي /storage/ مكرر
   const cleanPath = imagePath.replace(/^\/?storage\//, '')
@@ -167,7 +167,7 @@ const goBack = () => {
   router.push('/admin/dashboard')
 }
 
-// ✅ دالة تعبئة الفورم من بيانات المستخدم
+//  دالة تعبئة الفورم من بيانات المستخدم
 const fillForm = (user) => {
   if (!user) return
   
@@ -183,7 +183,7 @@ const fillForm = (user) => {
     ? Number(user.gender) 
     : null
 
-  // ✅ تعيين الصورة
+  //  تعيين الصورة
   if (user.image_path) {
     avatarPreview.value = getImageUrl(user.image_path)
     console.log('✅ Image URL set:', avatarPreview.value)
@@ -192,7 +192,7 @@ const fillForm = (user) => {
   }
 }
 
-// ✅ معالجة خطأ تحميل الصورة
+//  معالجة خطأ تحميل الصورة
 const handleImageError = () => {
   console.warn('⚠️ Failed to load image, using default')
   avatarPreview.value = defaultAvatar
@@ -224,14 +224,14 @@ const handleImageUpload = (event) => {
   const file = event.target.files[0]
   if (!file) return
   
-  // ✅ التحقق من حجم الصورة (max 2MB)
+  //  التحقق من حجم الصورة (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
     errorMsg.value = '⚠️ حجم الصورة يجب أن يكون أقل من 2MB'
     setTimeout(() => { errorMsg.value = '' }, 3000)
     return
   }
   
-  // ✅ التحقق من نوع الصورة
+  //  التحقق من نوع الصورة
   const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
     errorMsg.value = '⚠️ نوع الصورة غير مدعوم. استخدم JPG, PNG, GIF أو WEBP'
@@ -279,19 +279,19 @@ const saveProfile = async () => {
       const updatedUser = response.data.user
       console.log('✅ Profile updated:', updatedUser)
 
-      // ✅ تحديث الفورم بالبيانات الجديدة
+      //  تحديث الفورم بالبيانات الجديدة
       fillForm(updatedUser)
 
-      // ✅ تحديث الـ localStorage
+      //  تحديث الـ localStorage
       localStorage.setItem('delivro_current_user', JSON.stringify(updatedUser))
       localStorage.setItem('delivro_email', updatedUser.email)
 
-      // ✅ مسح الصورة المرفوعة
+      //  مسح الصورة المرفوعة
       imageFile.value = null
 
       successMsg.value = '✅ تم تحديث بيانات المسؤول بنجاح!'
       
-      // ✅ إعادة تحميل الصورة من الخادم بعد التحديث
+      //  إعادة تحميل الصورة من الخادم بعد التحديث
       setTimeout(() => {
         if (updatedUser.image_path) {
           avatarPreview.value = getImageUrl(updatedUser.image_path)
@@ -320,7 +320,7 @@ const saveProfile = async () => {
 </script>
 
 <style scoped>
-/* ✅ Styles إضافية للصورة */
+/*  Styles إضافية للصورة */
 .avatar-section {
   display: flex;
   flex-direction: column;
@@ -397,7 +397,7 @@ const saveProfile = async () => {
   margin-top: 5px;
 }
 
-/* ✅ الوضع الداكن */
+/*  الوضع الداكن */
 .dark .admin-badge {
   background: #1e293b;
   color: #94a3b8;
@@ -407,7 +407,7 @@ const saveProfile = async () => {
   color: #e2e8f0;
 }
 
-/* ✅ رسائل الحالة */
+/*  رسائل الحالة */
 .status-msg {
   padding: 12px 16px;
   border-radius: 10px;
@@ -446,7 +446,7 @@ const saveProfile = async () => {
   to { transform: rotate(360deg); }
 }
 
-/* ✅ Responsive */
+/*  Responsive */
 @media (max-width: 768px) {
   .avatar-holder {
     width: 120px;

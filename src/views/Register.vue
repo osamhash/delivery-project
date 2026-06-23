@@ -1,7 +1,7 @@
 <template>
   <div class="auth-shell" dir="rtl">
 
-    <!-- ░░ Visual Side ░░ -->
+    <!--  Visual Side  -->
     <div class="visual-panel">
       <div class="vp-bg"></div>
       <div class="vp-grid"></div>
@@ -163,7 +163,7 @@
           </transition>
         </div>
 
-        <!-- ══ STEP 2: Account Security ══ -->
+        <!--  STEP 2: Account Security  -->
         <div v-show="currentStep === 2" class="step-body">
           <div class="field-group" :class="{ 'field-error': errors.email }">
             <label>البريد الإلكتروني <span class="req">*</span></label>
@@ -336,7 +336,7 @@ function goNext() { if (validateStep(currentStep.value)) currentStep.value++ }
 async function handleRegister() {
   if (!validateStep(2)) return
   
-  // ✅ تحقق إضافي للتاجر
+  //  تحقق إضافي للتاجر
   if (form.value.role === 'provider' && !form.value.provider_type) {
     errors.value = { provider_type: 'نوع المتجر مطلوب للتاجر' }
     currentStep.value = 1
@@ -346,7 +346,7 @@ async function handleRegister() {
   isLoading.value = true
   serverError.value = ''
   
-  // ✅ طباعة البيانات المرسلة للتأكد
+  //  طباعة البيانات المرسلة للتأكد
   console.log('📤 Sending registration data:', {
     first_name: form.value.first_name,
     last_name: form.value.last_name,
@@ -400,7 +400,7 @@ async function handleRegister() {
     
     const data = err.response?.data
     
-    // ✅ عرض الأخطاء التفصيلية
+    //  عرض الأخطاء التفصيلية
     if (data?.errors) {
       const mapped = {}
       for (const [key, messages] of Object.entries(data.errors)) {
@@ -409,7 +409,7 @@ async function handleRegister() {
       }
       errors.value = mapped
       
-      // ✅ تحديد أي تبويب فيه الخطأ
+      //  تحديد أي تبويب فيه الخطأ
       if (mapped.role || mapped.image) currentStep.value = 0
       else if (mapped.first_name || mapped.last_name || mapped.provider_type || mapped.phone || mapped.address) {
         currentStep.value = 1

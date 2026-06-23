@@ -166,7 +166,7 @@
         </section>
       </div>
 
-      <!-- 3. Orders Tab - ✅ الطلبات المكتملة تظهر كـ "مكتمل ✅" فقط -->
+      <!-- 3. Orders Tab -  الطلبات المكتملة تظهر كـ "مكتمل " فقط -->
       <div v-if="activeTab === 'orders'" class="tab-content animate-fade">
         <section class="panel-section">
           <div class="panel-header">
@@ -212,12 +212,12 @@
                     </span>
                   </td>
                   <td>
-                    <!-- ✅ الطلب المكتمل: يظهر "مكتمل ✅" فقط -->
+                    <!--  الطلب المكتمل: يظهر "مكتمل " فقط -->
                     <div v-if="order.status?.name === 'Completed'" class="completed-label">
                       ✅ مكتمل
                     </div>
                     
-                    <!-- ✅ الحالات الأخرى: تظهر أزرار التحكم -->
+                    <!-- الحالات الأخرى: تظهر أزرار التحكم -->
                     <div v-else class="table-actions">
                       <select 
                         class="status-selector" 
@@ -291,7 +291,7 @@ import '../assets/styles/AdminDashboard .css'
 
 const router = useRouter()
 
-// ─── State ───
+//  State 
 const activeTab      = ref('overview')
 const isDark         = ref(localStorage.getItem('delivro_theme') === 'dark')
 const loading        = ref(true)
@@ -309,7 +309,7 @@ const userSearchQuery  = ref('')
 const orderStatusFilter = ref('')
 const orderSearchQuery  = ref('')
 
-// ─── Computed ───
+//  Computed 
 const tabTitle = computed(() => {
   const titles = {
     overview: 'لوحة التحكم والمراقبة',
@@ -416,7 +416,7 @@ const filteredOrders = computed(() => {
   return result
 })
 
-// ─── Methods ───
+//  Methods 
 const toggleTheme = () => {
   isDark.value = !isDark.value
   localStorage.setItem('delivro_theme', isDark.value ? 'dark' : 'light')
@@ -433,7 +433,7 @@ const logout = () => {
 
 const reloadData = () => loadAdminData()
 
-// ─── جلب البيانات ───
+//  جلب البيانات 
 const loadAdminData = async () => {
   try {
     loading.value    = true
@@ -504,9 +504,9 @@ const loadAdminData = async () => {
 
 onMounted(() => loadAdminData())
 
-// ─── إجراءات الطلبات ───
+//  إجراءات الطلبات 
 const changeStatusByAdmin = async (order, newStatus) => {
-  // ✅ منع تغيير حالة الطلب المكتمل
+  //  منع تغيير حالة الطلب المكتمل
   if (order.status?.name === 'Completed') {
     errorMsg.value = 'لا يمكن تغيير حالة طلب مكتمل'
     setTimeout(() => { errorMsg.value = '' }, 3000)
@@ -528,7 +528,7 @@ const changeStatusByAdmin = async (order, newStatus) => {
 }
 
 const cancelOrderByAdmin = async (id) => {
-  // ✅ منع إلغاء الطلب المكتمل
+  //  منع إلغاء الطلب المكتمل
   const order = orders.value.find(o => o.id === id)
   if (order?.status?.name === 'Completed') {
     errorMsg.value = 'لا يمكن إلغاء طلب مكتمل'
@@ -548,7 +548,7 @@ const cancelOrderByAdmin = async (id) => {
   setTimeout(() => { successMsg.value = '' }, 3000)
 }
 
-// ─── Modal إدارة المستخدمين ───
+//  Modal إدارة المستخدمين 
 const showUserModal = ref(false)
 const editingUser   = ref(null)
 const userForm      = ref({ first_name: '', last_name: '', email: '', phone: '', address: '' })

@@ -66,7 +66,7 @@ const router = createRouter({
         //Admin Route
         { path: '/admin', redirect: '/admin/dashboard' },
         {
-            path: '/admin/profile', // ✅ أضف هذا
+            path: '/admin/profile', // 
             name: 'admin-profile',
             component: () =>
                 import ('../views/AdminProfile.vue'),
@@ -87,7 +87,7 @@ const router = createRouter({
     ]
 })
 
-// ✅ Navigation Guard - بدون next() callback (الطريقة الحديثة)
+// Navigation Guard - بدون next() callback (الطريقة الحديثة)
 router.beforeEach((to, from) => {
     const token = localStorage.getItem('token')
     const userRole = localStorage.getItem('delivro_role')

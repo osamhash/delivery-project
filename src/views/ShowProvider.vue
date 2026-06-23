@@ -1,7 +1,7 @@
 <template>
   <div class="providers-page" dir="rtl">
 
-    <!-- ░░ Ambient Background ░░ -->
+    <!--  Ambient Background  -->
     <div class="ambient">
       <div class="orb orb-1"></div>
       <div class="orb orb-2"></div>
@@ -9,7 +9,7 @@
       <div class="noise"></div>
     </div>
 
-    <!-- ░░ Top Nav ░░ -->
+    <!--  Top Nav  -->
     <nav class="top-nav">
       <div class="nav-inner">
         <div class="nav-brand">
@@ -22,7 +22,7 @@
       </div>
     </nav>
 
-    <!-- ░░ Hero Header ░░ -->
+    <!--  Hero Header  -->
     <div class="header">
       <div class="header-eyebrow">
         <span class="eyebrow-dot"></span>
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <!-- ░░ Stats Bar ░░ -->
+    <!--  Stats Bar  -->
     <div class="stats-bar">
       <div class="stat">
         <span class="stat-num">{{ providers.length }}</span>
@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <!-- ░░ Loading Skeleton ░░ -->
+    <!--  Loading Skeleton  -->
     <div v-if="loading" class="grid">
       <div v-for="n in 6" :key="n" class="card skeleton-card">
         <div class="sk sk-avatar"></div>
@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <!-- ░░ Empty State ░░ -->
+    <!--  Empty State  -->
     <div v-else-if="filteredProviders.length === 0" class="empty-state">
       <div class="empty-icon">🏪</div>
       <h3>لا توجد متاجر</h3>
@@ -93,7 +93,7 @@
       <button class="empty-btn" @click="searchQuery = ''; activeFilter = 'all'">إعادة تعيين</button>
     </div>
 
-    <!-- ░░ Provider Grid ░░ -->
+    <!--  Provider Grid  -->
     <div v-else class="grid">
       <div
         v-for="(p, index) in filteredProviders"
@@ -142,7 +142,7 @@
       </div>
     </div>
 
-    <!-- ░░ Footer Note ░░ -->
+    <!--  Footer Note  -->
     <div class="page-footer">
       <span>🔒 دفع آمن ومضمون</span>
       <span class="dot-sep">·</span>
@@ -255,7 +255,7 @@ onMounted(async () => {
     }
     
   } catch (e) {
-    console.error('Error fetching providers:', e)
+    //console.error('Error fetching providers:', e)
     providers.value = []
   } finally {
     loading.value = false

@@ -50,7 +50,7 @@
       <div v-if="successMsg" class="alert success-alert">✨ {{ successMsg }}</div>
       <div v-if="errorMsg" class="alert error-alert">⚠️ {{ errorMsg }}</div>
 
-      <!-- ✅ 1. قسم الإحصائيات (Stats Tab) -->
+      <!--  1. قسم الإحصائيات (Stats Tab) -->
       <div v-if="activeTab === 'stats'" class="tab-content animate-fade">
         <section class="stats-grid">
           <article class="stat-card">
@@ -109,7 +109,7 @@
         </section>
       </div>
 
-      <!-- ✅ 2. قسم إدارة المنتجات (Products Tab) -->
+      <!--  2. قسم إدارة المنتجات (Products Tab) -->
       <div v-if="activeTab === 'products'" class="tab-content animate-fade">
         <section class="panel-section">
           <div class="panel-header">
@@ -157,7 +157,7 @@
         </section>
       </div>
 
-      <!-- ✅ 3. قسم إدارة الطلبات (Orders Tab) -->
+      <!--  3. قسم إدارة الطلبات (Orders Tab) -->
       <div v-if="activeTab === 'orders'" class="tab-content animate-fade">
         <section class="panel-section">
           <div class="panel-header">
@@ -207,12 +207,12 @@
                     </span>
                   </td>
                   <td>
-                    <!-- ✅ الطلبات المكتملة أو الملغية -->
+                    <!--  الطلبات المكتملة أو الملغية -->
                     <div v-if="order.status?.name === 'Completed' || order.status?.name === 'Rejected'" class="action-done">
                       {{ order.status?.name === 'Completed' ? '✅ مكتمل' : '❌ ملغي' }}
                     </div>
                     
-                    <!-- ✅ الطلبات النشطة -->
+                    <!--  الطلبات النشطة -->
                     <div v-else class="order-status-actions">
                       <button 
                         v-if="order.status?.name === 'Pending'" 
@@ -242,7 +242,7 @@
 
     </main>
 
-    <!-- 🚨 MODAL: إضافة/تعديل منتج -->
+    <!--  MODAL: إضافة/تعديل منتج -->
     <transition name="fade">
       <div v-if="showProductModal" class="modal-overlay" @click.self="closeProductModal">
         <div class="modal-card">
@@ -291,7 +291,7 @@ import '../assets/styles/ProviderDashboard.css'
 
 const router = useRouter()
 
-// ==================== الحالات العامة ====================
+//  الحالات العامة 
 const activeTab = ref('stats')
 const isDark = ref(localStorage.getItem('delivro_theme') === 'dark')
 const loading = ref(true)
@@ -306,15 +306,15 @@ const products = ref([])
 const orders = ref([])
 const orderStatusFilter = ref('')
 
-// ✅ الصورة الافتراضية للمنتج
+//  الصورة الافتراضية للمنتج
 const defaultProductImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150"%3E%3Crect width="150" height="150" fill="%236366f1"/%3E%3Ctext x="75" y="90" font-size="60" text-anchor="middle" fill="white" font-family="Arial"%3E🍔%3C/text%3E%3C/svg%3E'
 
-// ==================== متغيرات الإحصائيات ====================
+//  متغيرات الإحصائيات 
 const totalSales = ref(0)
 const activeOrdersCount = ref(0)
 const avgRating = ref(0)
 
-// ==================== عنوان التبويب ====================
+//  عنوان التبويب 
 const tabTitle = computed(() => {
   if (activeTab.value === 'stats') return '📈 لوحة التحكم الإحصائية'
   if (activeTab.value === 'products') return '🍔 إدارة قائمة الطعام والمنتجات'
@@ -322,13 +322,13 @@ const tabTitle = computed(() => {
   return 'المتجر'
 })
 
-// ✅ تصفية الطلبات حسب الحالة
+//  تصفية الطلبات حسب الحالة
 const filteredOrders = computed(() => {
   if (!orderStatusFilter.value) return orders.value
   return orders.value.filter(o => o.status?.name === orderStatusFilter.value)
 })
 
-// ✅ دالة للحصول على رابط الصورة
+//  دالة للحصول على رابط الصورة
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
@@ -338,19 +338,19 @@ const getImageUrl = (imagePath) => {
   return `${baseUrl}/storage/${cleanPath}?t=${Date.now()}`
 }
 
-// ✅ دالة للحصول على صورة المنتج
+//  دالة للحصول على صورة المنتج
 const getProductImage = (product) => {
   if (product.image_url) return product.image_url
   if (product.image_path) return getImageUrl(product.image_path)
   return defaultProductImage
 }
 
-// ✅ معالجة خطأ تحميل الصورة
+//  معالجة خطأ تحميل الصورة
 const handleImageError = (event) => {
   event.target.src = defaultProductImage
 }
 
-// ==================== دوال واجهة المستخدم ====================
+//  دوال واجهة المستخدم 
 const toggleTheme = () => {
   isDark.value = !isDark.value
   localStorage.setItem('delivro_theme', isDark.value ? 'dark' : 'light')
@@ -371,7 +371,7 @@ const reloadData = () => {
   loadDashboardData()
 }
 
-// ==================== جلب جميع البيانات من API ====================
+//  جلب جميع البيانات من API 
 const loadDashboardData = async () => {
   try {
     loading.value = true
@@ -392,11 +392,11 @@ const loadDashboardData = async () => {
       providerId.value = currentProvider.id
       storeName.value = currentProvider.type || 'متجر Delivro'
 
-      // ✅ جلب المنتجات
+      //  جلب المنتجات
       const productsRes = await api.get(`/providers/${currentProvider.id}/products`)
       products.value = productsRes.data.data || productsRes.data || []
 
-      // ✅ جلب الإحصائيات
+      //  جلب الإحصائيات
       try {
         const statsRes = await api.get('/provider/dashboard/stats')
         totalSales.value = statsRes.data.total_sales || 0
@@ -409,7 +409,7 @@ const loadDashboardData = async () => {
         avgRating.value = 0
       }
 
-      // ✅ جلب الطلبات
+      //  جلب الطلبات
       try {
         const ordersRes = await api.get('/provider/dashboard/all-orders')
         orders.value = ordersRes.data || []
@@ -428,7 +428,7 @@ const loadDashboardData = async () => {
   }
 }
 
-// ==================== تحديث حالة الطلب ====================
+//  تحديث حالة الطلب 
 const updateOrderStatus = async (order, newStatus) => {
   try {
     await api.put(`/provider/orders/${order.id}/status`, { status: newStatus })
@@ -452,7 +452,7 @@ const formatStatus = (statusName) => {
   return map[statusName] || statusName
 }
 
-// ==================== إدارة المنتجات ====================
+//  إدارة المنتجات 
 const showProductModal = ref(false)
 const editingProduct = ref(null)
 const productImagePreview = ref('')
@@ -563,14 +563,14 @@ const deleteProduct = async (id) => {
   }
 }
 
-// ==================== تحميل أولي ====================
+//  تحميل أولي 
 onMounted(() => {
   loadDashboardData()
 })
 </script>
 
 <style scoped>
-/* ✅ Styles للصورة في الـ Sidebar */
+/*  Styles للصورة في الـ Sidebar */
 .profile-card {
   display: flex;
   flex-direction: column;
@@ -628,7 +628,7 @@ onMounted(() => {
   color: var(--text-secondary, #64748b);
 }
 
-/* ✅ Styles لصورة المنتج في الجدول */
+/*  Styles لصورة المنتج في الجدول */
 .table-product-thumb {
   width: 50px;
   height: 50px;
@@ -637,7 +637,7 @@ onMounted(() => {
   border: 2px solid var(--border-color, #e2e8f0);
 }
 
-/* ✅ Styles لمعاينة الصورة في المودال */
+/*  Styles لمعاينة الصورة في المودال */
 .modal-image-preview {
   display: flex;
   flex-direction: column;
@@ -662,7 +662,7 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* ✅ Styles للطلبات */
+/*  Styles للطلبات */
 .ordered-items-list {
   list-style: none;
   padding: 0;
@@ -716,7 +716,7 @@ onMounted(() => {
   color: #22c55e;
 }
 
-/* ✅ الوضع الداكن */
+/*  الوضع الداكن */
 .dark .profile-card {
   background: #1e293b;
 }
@@ -744,7 +744,7 @@ onMounted(() => {
   color: #94a3b8;
 }
 
-/* ✅ Responsive */
+/*  Responsive */
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr 1fr;
