@@ -66,9 +66,9 @@ class ProductController extends Controller
 
     //chang 6/1/2026
 
-    /**
-     * إضافة منتج جديد (خاص بالتاجر المسجل دخوله)
-     */
+
+    //  إضافة منتج جديد (خاص بالتاجر المسجل دخوله)
+
     public function store(Request $request)
     {
         $request->validate([
@@ -103,9 +103,9 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
-    /**
-     * تعديل منتج موجود
-     */
+
+    // تعديل منتج موجود
+
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
@@ -141,9 +141,9 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    /**
-     * حذف منتج
-     */
+
+    //  حذف منتج
+
     public function destroy(Request $request, $id)
     {
         $product = Product::findOrFail($id);
@@ -161,9 +161,9 @@ class ProductController extends Controller
         return response()->json(['message' => 'تم حذف المنتج بنجاح']);
     }
 
-    /**
-     * جلب منتجات المتجر الحالي (للتاجر نفسه)
-     */
+
+    //  جلب منتجات المتجر الحالي (للتاجر نفسه)
+
     public function myProducts(Request $request)
     {
         $provider = $request->user()->provider;

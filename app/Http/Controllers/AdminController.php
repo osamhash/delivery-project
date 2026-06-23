@@ -291,7 +291,7 @@ class AdminController extends Controller
         return $map[$name] ?? null;
     }
 
-    // ✅ تحديث صورة الادمن - تخزين المسار بصيغة admins/اسم_الصورة
+    // تحديث صورة الادمن - تخزين المسار بصيغة admins/اسم_الصورة
     public function updateAdminProfile(Request $request)
     {
         try {
@@ -333,7 +333,7 @@ class AdminController extends Controller
             if ($request->has('date_of_birth')) $user->date_of_birth = $request->date_of_birth;
             if ($request->has('gender')) $user->gender = $request->gender;
 
-            // ✅ معالجة الصورة - تخزينها في مجلد admins
+            // معالجة الصورة - تخزينها في مجلد admins
             if ($request->hasFile('image')) {
                 // حذف الصورة القديمة
                 if ($user->image_path && Storage::disk('public')->exists($user->image_path)) {
@@ -343,7 +343,7 @@ class AdminController extends Controller
                 $image = $request->file('image');
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
 
-                // ✅ تخزين في storage/app/public/admins
+                // تخزين في storage/app/public/admins
                 $path = $image->storeAs('admins', $imageName, 'public');
 
                 if (!$path) {
@@ -353,7 +353,7 @@ class AdminController extends Controller
                     ], 500);
                 }
 
-                // ✅ حفظ المسار في قاعدة البيانات بصيغة admins/اسم_الصورة
+                //  حفظ المسار في قاعدة البيانات بصيغة admins/اسم_الصورة
                 $user->image_path = $path; // هذا سيكون مثلاً: admins/123456_abc.jpg
             }
 
@@ -362,7 +362,7 @@ class AdminController extends Controller
             // تحضير البيانات للرد
             $userData = $user->toArray();
             if ($user->image_path) {
-                // ✅ إضافة الرابط الكامل للصورة للعرض
+                //  إضافة الرابط الكامل للصورة للعرض
                 $userData['image_url'] = Storage::disk('public')->url($user->image_path);
                 $userData['image_path'] = $user->image_path;
             }

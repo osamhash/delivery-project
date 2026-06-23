@@ -58,7 +58,7 @@ class AuthController extends Controller
             'image_path' => $imagePath,
         ]);
 
-        // ── إنشاء السجل المرتبط حسب الدور
+        //  إنشاء السجل المرتبط حسب الدور
         if ($request->role === 'provider') {
             Provider::create([
                 'user_id' => $user->id,
@@ -148,28 +148,28 @@ class AuthController extends Controller
     //     ]);
     // }
     public function me(Request $request): JsonResponse
-{
-    $user = $request->user()->fresh()->load('role');
+    {
+        $user = $request->user()->fresh()->load('role');
 
-    return response()->json([
-        'user' => [
-            'id'            => $user->id,
-            'first_name'    => $user->first_name,
-            'second_name'   => $user->second_name,
-            'last_name'     => $user->last_name,
-            'email'         => $user->email,
-            'phone'         => $user->phone,
-            'address'       => $user->address,
-            'gender'        => $user->gender,
-            'date_of_birth' => $user->date_of_birth,
-            'image_path'    => $user->image_path
-                ? asset('storage/' . str_replace('\\', '/', $user->image_path))
-                : null,
-            'role'          => $user->role->name,
-            'provider'      => $user->provider,
-        ]
-    ]);
-}
+        return response()->json([
+            'user' => [
+                'id'            => $user->id,
+                'first_name'    => $user->first_name,
+                'second_name'   => $user->second_name,
+                'last_name'     => $user->last_name,
+                'email'         => $user->email,
+                'phone'         => $user->phone,
+                'address'       => $user->address,
+                'gender'        => $user->gender,
+                'date_of_birth' => $user->date_of_birth,
+                'image_path'    => $user->image_path
+                    ? asset('storage/' . str_replace('\\', '/', $user->image_path))
+                    : null,
+                'role'          => $user->role->name,
+                'provider'      => $user->provider,
+            ]
+        ]);
+    }
 
 
     public function forgotPassword(Request $request): JsonResponse
@@ -194,9 +194,9 @@ class AuthController extends Controller
         ], 500);
     }
 
-    // ════════════════════════════════════════════════
+
     //  RESET PASSWORD
-    // ════════════════════════════════════════════════
+
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([

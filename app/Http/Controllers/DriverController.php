@@ -5,23 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DriverResource;
 use App\Models\Driver;
-use App\Models\User;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Review;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class DriverController extends Controller
 {
-    // ─── Helpers ──────────────────────────────────────────────
+    // Helpers
 
     private function getDriverRating($driverId)
     {
@@ -47,7 +43,7 @@ class DriverController extends Controller
             ->count();
     }
 
-    // ─── Dashboard ────────────────────────────────────────────
+    // Dashboard
 
     public function dashboard()
     {
@@ -107,7 +103,7 @@ class DriverController extends Controller
         ]);
     }
 
-    // ─── Availability ─────────────────────────────────────────
+    // Availability
 
     public function updateAvailability(Request $request)
     {
@@ -123,7 +119,7 @@ class DriverController extends Controller
         ]);
     }
 
-    // ─── Accept Order ─────────────────────────────────────────
+    // Accept Order
 
     public function acceptOrder(Order $order)
     {
@@ -157,7 +153,7 @@ class DriverController extends Controller
         return response()->json(['message' => 'تم قبول الطلب بنجاح']);
     }
 
-    // ─── Reject Order ─────────────────────────────────────────
+    // Reject Order
 
     public function rejectOrder(Request $request, Order $order)
     {
@@ -193,7 +189,7 @@ class DriverController extends Controller
         return response()->json(['message' => 'تم رفض الطلب']);
     }
 
-    // ─── Cancel Order (while OnTheWay) ──────────────────────
+    // Cancel Order (while OnTheWay)
 
     public function cancelOrder(Request $request, Order $order)
     {
@@ -245,7 +241,7 @@ class DriverController extends Controller
         return response()->json(['message' => 'تم إلغاء الطلب']);
     }
 
-    // ─── Start Delivery ───────────────────────────────────────
+    // Start Delivery
 
     public function startDelivery(Order $order)
     {
@@ -270,7 +266,7 @@ class DriverController extends Controller
         return response()->json(['message' => 'تم بدء التوصيل']);
     }
 
-    // ─── Complete Delivery ────────────────────────────────────
+    // Complete Delivery
 
     public function completeDelivery(Order $order)
     {
@@ -300,7 +296,7 @@ class DriverController extends Controller
         return response()->json(['message' => 'تم إكمال التوصيل']);
     }
 
-    // ─── Confirm Cash Payment ─────────────────────────────────
+    // Confirm Cash Payment
 
     public function confirmCashPayment(Order $order)
     {
@@ -347,7 +343,7 @@ class DriverController extends Controller
         ]);
     }
 
-    // ─── Order Details ────────────────────────────────────────
+    // Order Details
 
     public function getOrderDetails(Order $order)
     {
@@ -360,7 +356,7 @@ class DriverController extends Controller
         return response()->json($order->load(['user', 'provider.user', 'products', 'review', 'status']));
     }
 
-    // ─── Profile ──────────────────────────────────────────────
+    // Profile
 
     public function getProfile()
     {
@@ -449,7 +445,7 @@ class DriverController extends Controller
         ]);
     }
 
-    // ─── Delivery History ─────────────────────────────────────
+    // Delivery History
 
     public function getDeliveryHistory()
     {
@@ -467,9 +463,9 @@ class DriverController extends Controller
         return response()->json($orders);
     }
 
-    // ─── All / Available Drivers ──────────────────────────────
+    // All / Available Drivers
 
-    // ✅ تم تعديل هذه الدالة لجلب البيانات كـ array بدلاً من Resource
+    // ->(array) بدلاً من Resource
     public static function index()
     {
         try {
@@ -492,7 +488,7 @@ class DriverController extends Controller
         }
     }
 
-    // ✅ تم تعديل هذه الدالة لجلب البيانات كـ array بدلاً من Resource
+    // ->(array) بدلاً من Resource
     public function available()
     {
         try {

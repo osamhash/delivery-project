@@ -16,8 +16,8 @@ class ProviderResource extends JsonResource
             'type'           => $this->type,
             'orders_count'   => $this->orders_count ?? 0,
             'rating'         => $rating,
-            'delivery_mins'  => 15,   // يمكن جعله ديناميكياً لاحقاً
-            'is_available'   => true, // يمكن إضافة حقل للـ providers لاحقاً
+            'delivery_mins'  => 15,   // يمكن جعله ديناميكياً بعدين
+            'is_available'   => true, // يمكن إضافة حقل للـ providers بغدين
             'user'           => [
                 'id'         => $this->user?->id,
                 'first_name' => $this->user?->first_name,
@@ -31,7 +31,7 @@ class ProviderResource extends JsonResource
         ];
     }
 
-    // ── helpers ──────────────────────────────────────────────
+    //  helpers
 
     private function buildImageUrl(): ?string
     {
@@ -43,8 +43,7 @@ class ProviderResource extends JsonResource
 
     private function calculateRating(): float
     {
-        // إذا أضفت جدول reviews لاحقاً استخدمه هنا
-        // حالياً: تقييم عشوائي ثابت بين 4.5 و 5.0 بناءً على id
+
         $base = 4.5;
         $bonus = ($this->id % 5) * 0.1;
         return round($base + $bonus, 1);

@@ -42,11 +42,7 @@ class Order extends Model
                     ->withPivot('price', 'quantity')
                     ->withTimestamps();
     }
-    // public function products()
-    // {
-    //     return $this->belongsToMany(Product::class, 'orders_products')
-    //         ->withPivot('price', 'quantity');
-    // }
+
     public function review()
     {
         return $this->hasOne(Review::class);

@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
 
-            // ❌ حذف payment_status
+            //  حذف payment_status
             $table->dropColumn('payment_status');
 
-            // ✅ إضافة payment_method
+            //  إضافة payment_method
             $table->string('payment_method')
                   ->default('cash');
         });

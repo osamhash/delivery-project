@@ -69,15 +69,6 @@ class OrderController extends Controller
         return response()->json(['message' => 'Order deleted successfully']);
     }
 
-    // public function userOrders($userId): JsonResponse
-    // {
-    //     $orders = Order::with(['provider.user', 'driver.user', 'status', 'products'])
-    //                    ->where('user_id', $userId)
-    //                    ->latest()
-    //                    ->get();
-
-    //     return response()->json($orders);
-    // }
     public function userOrders($id)
     {
         return Order::where('user_id', $id)
@@ -86,15 +77,6 @@ class OrderController extends Controller
             ->get();
     }
 
-    // public function providerOrders($providerId): JsonResponse
-    // {
-    //     $orders = Order::with(['user', 'driver.user', 'status', 'products'])
-    //                    ->where('provider_id', $providerId)
-    //                    ->latest()
-    //                    ->get();
-
-    //     return response()->json($orders);
-    // }
     public function providerOrders($id)
     {
         return Order::where('provider_id', $id)
@@ -107,7 +89,7 @@ class OrderController extends Controller
     {
         return response()->json(OrderStatus::all());
     }
-    //   ___________________________
+
 
     //POST /api/v1/orders
     //إنشاء طلب جديد وحفظ منتجاته
@@ -223,10 +205,10 @@ class OrderController extends Controller
             ->paginate(10);
     }
 
-    /**
-     * تحديث حالة الطلب (للتاجر فقط)
-     * المتوقع: status = 'accepted' أو 'completed'
-     */
+
+    // تحديث حالة الطلب (للتاجر فقط)
+    // المتوقع: status = 'accepted' أو 'completed'
+
     public function updateProviderOrderStatus(Request $request, $id)
     {
         $request->validate([

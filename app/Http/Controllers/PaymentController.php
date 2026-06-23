@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
-    // ─── Helper Method ─────────────────────────────────────────
+    //  Helper Method
     private function canBePaid($order)
     {
         $completedStatusId = OrderStatus::where('name', 'completed')->value('id');

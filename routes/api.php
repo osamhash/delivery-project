@@ -14,11 +14,8 @@ use App\Http\Controllers\ReviewController;
 use App\Models\Driver;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes (No Authentication Required)
-|--------------------------------------------------------------------------
-*/
+//  Public Routes (No Authentication Required)
+
 
 // Test endpoint
 Route::get('/test', function () {
@@ -45,11 +42,9 @@ Route::get('/drivers/available', function () {
 // Order statuses
 Route::get('/statuses', [OrderController::class, 'statuses']);
 
-/*
-|--------------------------------------------------------------------------
-| Protected Routes (Requires Authentication)
-|--------------------------------------------------------------------------
-*/
+
+//Protected Routes (Requires Authentication)
+
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -87,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ========== ORDERS ==========
     Route::prefix('orders')->group(function () {
         Route::post('/', [OrderController::class, 'store']);
-        Route::get('/{order}', [OrderController::class, 'show']);  // ✅ هذا الroute المفقود
+        Route::get('/{order}', [OrderController::class, 'show']);
         Route::put('/{order}', [OrderController::class, 'update']);
         Route::delete('/{order}', [OrderController::class, 'destroy']);
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
@@ -107,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ========== REVIEWS ==========
     Route::prefix('reviews')->group(function () {
-        Route::post('/', [ReviewController::class, 'store']);  // ✅ POST /api/reviews
+        Route::post('/', [ReviewController::class, 'store']);  //  POST /api/reviews
         Route::get('/driver', [ReviewController::class, 'driverReviews']);
         Route::get('/provider', [ReviewController::class, 'providerReviews']);
         Route::get('/provider/rating', [ReviewController::class, 'providerRating']);

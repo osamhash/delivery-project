@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
+    //عشان ما انسى
     /**
      * POST /api/v1/reviews
      * تقييم الطلبية والسائق والمتجر معاً بعملية واحدة
@@ -53,7 +54,7 @@ class ReviewController extends Controller
             'rating'      => $finalRating,
             'comment'     => $request->comment ?? $request->driver_comment ?? '',
 
-            // حقول إضافية — أضفها للـ migration إذا لم تكن موجودة
+            // ممكن اضيفها على ال review مبدئيا (not yet)
             // 'provider_rating' => $request->rating,
             // 'driver_rating'   => $request->driver_rating,
         ]);
@@ -64,10 +65,10 @@ class ReviewController extends Controller
         ], 201);
     }
 
-    /**
-     * GET /api/v1/provider/reviews
-     * جلب تقييمات المتجر الحالي (للتاجر)
-     */
+
+     //GET /api/v1/provider/reviews
+    // جلب تقييمات المتجر الحالي (للتاجر)
+
     public function providerReviews(Request $request)
     {
         $provider = $request->user()->provider;
@@ -83,10 +84,10 @@ class ReviewController extends Controller
         return response()->json($reviews);
     }
 
-    /**
-     * GET /api/v1/provider/rating
-     * متوسط تقييم المتجر
-     */
+
+    //  GET /api/v1/provider/rating
+    //  متوسط تقييم المتجر
+
     public function providerRating(Request $request)
     {
         $provider = $request->user()->provider;
@@ -98,10 +99,10 @@ class ReviewController extends Controller
         return response()->json(['avg_rating' => round($avg, 1)]);
     }
 
-    /**
-     * GET /api/v1/driver/reviews
-     * تقييمات السائق الحالي
-     */
+
+      //GET /api/v1/driver/reviews
+     // تقييمات السائق الحالي
+
     public function driverReviews(Request $request)
     {
         $driver = $request->user()->driver;
