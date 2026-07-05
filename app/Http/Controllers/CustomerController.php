@@ -145,12 +145,12 @@ class CustomerController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $id,
+            // 'email' => 'required|email|unique:users,email,' . $id,
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:100',
             'date_of_birth' => 'nullable|date',
             'gender' => 'nullable|in:0,1',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
         ]);
 
         // جلب المستخدم

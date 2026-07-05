@@ -30,6 +30,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
+
 // Public provider routes
 Route::get('/providers', [ProviderController::class, 'index']);
 Route::get('/providers/{provider}/products', [ProductController::class, 'byProvider']);
@@ -59,13 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [CustomerController::class, 'dashboard']);
         Route::get('/profile', [CustomerController::class, 'show']);
         Route::put('/profile', [CustomerController::class, 'update']);
-    });
 
+
+    });
+    Route::post('customers/{id}', [CustomerController::class, 'update']);
+    Route::put('customers/update/{id}', [AuthController::class, 'update']);
     // ========== DRIVER ==========
     Route::prefix('driver')->group(function () {
         Route::get('/dashboard', [DriverController::class, 'dashboard']);
         Route::patch('/availability', [DriverController::class, 'updateAvailability']);
         Route::get('/profile', [DriverController::class, 'getProfile']);
+        Route::post('/profile', [DriverController::class, 'updateProfile']);
         Route::put('/profile', [DriverController::class, 'updateProfile']);
         Route::get('/history', [DriverController::class, 'getDeliveryHistory']);
 

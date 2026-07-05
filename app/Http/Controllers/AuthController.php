@@ -9,8 +9,10 @@ use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -28,11 +30,11 @@ class AuthController extends Controller
             'gender'                => 'nullable|in:0,1',
             'role'                  => 'required|in:customer,provider,driver',
             'provider_type'         => 'required_if:role,provider|nullable|string|max:100',
-            'image'                 => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            'image'                 => 'nullable|image|mimes:jpeg,png,webp|max:20096',
         ], [
             'email.unique'          => 'هذا البريد الإلكتروني مستخدم مسبقاً',
             'phone.unique'          => 'رقم الهاتف مستخدم مسبقاً',
-            'image.max'             => 'حجم الصورة يجب أن يكون أقل من 2 ميجابايت',
+            'image.max'             => 'حجم الصورة يجب أن يكون أقل من 8 ميجابايت',
             'provider_type.required_if' => 'نوع المتجر مطلوب عند التسجيل كتاجر',
         ]);
 
@@ -224,6 +226,119 @@ class AuthController extends Controller
             Password::INVALID_USER   => response()->json(['message' => 'البريد الإلكتروني غير مسجّل'], 422),
             default                  => response()->json(['message' => 'حدث خطأ غير متوقع'], 500),
         };
+    }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'first_name'    => 'required|string|max:100',
+            'last_name'     => 'required|string|max:100',
+            'email'         => 'required|email|unique:users,email,' . $id,
+            'phone'         => 'nullable|string|max:20',
+            'address'       => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date',
+            'gender'        => 'nullable|in:0,1',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // تأكد إنو المستخدم عم يعدل حسابه هو بالذات
+        if ($user->id !== $request->user()->id) {
+            return response()->json(['message' => 'غير مصرح لك بتعديل هذا الحساب'], 403);
+        }
+
+        $user->first_name    = $request->first_name;
+        $user->second_name   = $request->second_name;
+        $user->last_name     = $request->last_name;
+        $user->email         = $request->email;
+        $user->phone         = $request->phone;
+        $user->address       = $request->address;
+        $user->date_of_birth = $request->date_of_birth;
+        $user->gender        = $request->gender;
+
+        // عند رفع صورة جديدة: احذف القديمة أولاً (إذا موجودة) بعدين خزّن الجديدة
+        if ($request->hasFile('image')) {
+            if ($user->image_path && Storage::disk('public')->exists($user->image_path)) {
+                Storage::disk('public')->delete($user->image_path);
+            }
+            $user->image_path = $request->file('image')->store('users', 'public');
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'تم تحديث بيانات الحساب بنجاح',
+            'data' => [
+                'id'            => $user->id,
+                'first_name'    => $user->first_name,
+                'second_name'   => $user->second_name,
+                'last_name'     => $user->last_name,
+                'email'         => $user->email,
+                'phone'         => $user->phone,
+                'address'       => $user->address,
+                'date_of_birth' => $user->date_of_birth,
+                'gender'        => $user->gender,
+                'image_path'    => $user->image_path ? asset('storage/' . $user->image_path) : null,
+            ]
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'first_name'    => 'sometimes|string|max:100',
+            'second_name'   => 'nullable|string|max:100',
+            'last_name'     => 'sometimes|string|max:100',
+            'email'         => 'sometimes|email|max:100|unique:users,email,' . $user->id,
+            'phone'         => 'nullable|string|max:20|unique:users,phone,' . $user->id,
+            'address'       => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date',
+            'gender'        => 'nullable|in:0,1',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($request->has('first_name'))    $user->first_name    = $request->first_name;
+        if ($request->has('second_name'))   $user->second_name   = $request->second_name;
+        if ($request->has('last_name'))     $user->last_name     = $request->last_name;
+        if ($request->has('email'))         $user->email         = $request->email;
+        if ($request->has('phone'))         $user->phone         = $request->phone;
+        if ($request->has('address'))       $user->address       = $request->address;
+        if ($request->has('date_of_birth')) $user->date_of_birth = $request->date_of_birth;
+        if ($request->has('gender'))        $user->gender        = $request->gender;
+
+        //  عند رفع صورة جديدة: احذف القديمة أولاً بعدين خزّن الجديدة
+        if ($request->hasFile('image')) {
+            if ($user->image_path && Storage::disk('public')->exists($user->image_path)) {
+                Storage::disk('public')->delete($user->image_path);
+            }
+            $user->image_path = $request->file('image')->store('users', 'public');
+        }
+
+        $user->save();
+        $driver = $user->driver;
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'تم تحديث الملف الشخصي',
+            'user'    => [
+                'id'            => $user->id,
+                'first_name'    => $user->first_name,
+                'second_name'   => $user->second_name,
+                'last_name'     => $user->last_name,
+                'email'         => $user->email,
+                'phone'         => $user->phone,
+                'address'       => $user->address,
+                'date_of_birth' => $user->date_of_birth,
+                'gender'        => $user->gender,
+                'image_path'    => $user->image_path ? asset('storage/' . $user->image_path) : null,
+                'driver'        => [
+                    'id'           => $driver->id,
+                    'is_available' => (bool) $driver->is_available,
+                ],
+            ],
+        ]);
     }
 }
 

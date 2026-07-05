@@ -212,7 +212,7 @@ class OrderController extends Controller
     public function updateProviderOrderStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:accepted,completed',
+            'status' => 'required|in:Accepted,Completed',
         ]);
 
         $order = Order::findOrFail($id);
@@ -224,7 +224,7 @@ class OrderController extends Controller
 
         // تعيين status_id المناسب بناءً على الاسم
         $statusName = $request->status;
-        $status = \App\Models\OrderStatus::where('name', $statusName)->first();
+        $status = OrderStatus::where('name', $statusName)->first();
 
         if (!$status) {
             return response()->json(['message' => 'حالة غير صالحة'], 422);

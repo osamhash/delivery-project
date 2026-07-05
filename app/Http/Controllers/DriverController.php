@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -390,13 +391,15 @@ class DriverController extends Controller
 
     public function updateProfile(Request $request)
     {
+
+    // --------------------
         $user = Auth::user();
 
         $request->validate([
             'first_name'    => 'sometimes|string|max:100',
             'second_name'   => 'nullable|string|max:100',
             'last_name'     => 'sometimes|string|max:100',
-            'email'         => 'sometimes|email|max:100|unique:users,email,' . $user->id,
+            'email'         => 'sometimes|email|unique:users,email,' . $user->id,
             'phone'         => 'nullable|string|max:20|unique:users,phone,' . $user->id,
             'address'       => 'nullable|string|max:100',
             'date_of_birth' => 'nullable|date',

@@ -313,7 +313,7 @@ class AdminController extends Controller
                 'address' => 'nullable|string|max:255',
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|boolean',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048'
             ]);
 
             if ($validator->fails()) {
