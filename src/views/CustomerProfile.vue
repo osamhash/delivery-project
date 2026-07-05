@@ -225,7 +225,7 @@ const saveProfile = async () => {
 
     let response;
     if (id) {
-      response = await api.post(`/customers/${id}`, formData, {
+      response = await api.post(`/customers/update/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
     } else {

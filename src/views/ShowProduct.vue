@@ -16,11 +16,13 @@
 
       <div v-for="p in products" :key="p.id" class="card">
 
-        <img class="img"
-          :src="p.image_url
-            ? `http://127.0.0.1:8000/storage/${p.image_path}`
-            : 'https://via.placeholder.com/300'"
-        />
+       <div class="image-box">
+          <img
+              class="img"
+              :src="p.image_path || placeholder"
+              :alt="p.type"
+          >
+      </div>
 
         <h4>{{ p.name }}</h4>
         <p>{{ p.description }}</p>

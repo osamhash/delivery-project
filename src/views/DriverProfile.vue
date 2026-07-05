@@ -289,7 +289,7 @@ const saveProfile = async () => {
       formData.append('image', imageFile.value)
     }
 
-    const response = await api.post('/driver/profile', formData, {
+    const response = await api.put('/driver/profile', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 

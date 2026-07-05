@@ -307,7 +307,7 @@ function strengthClass(l) {
 function triggerFileInput() { fileInput.value?.click() }
 function handleFileChange(e) {
   const file = e.target.files[0]; if (!file) return
-  if (file.size > 2 * 1024 * 1024) { errors.value.image = 'الصورة أكبر من 2 ميجابايت'; return }
+  if (file.size > 8 * 1024 * 1024) { errors.value.image = 'الصورة أكبر من 4 ميجابايت'; return }
   avatarFile.value = file; avatarPreview.value = URL.createObjectURL(file); clearError('image')
 }
 function removeAvatar() { avatarFile.value = null; avatarPreview.value = ''; if (fileInput.value) fileInput.value.value = '' }

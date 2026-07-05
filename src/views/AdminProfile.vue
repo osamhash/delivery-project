@@ -225,8 +225,8 @@ const handleImageUpload = (event) => {
   if (!file) return
   
   //  التحقق من حجم الصورة (max 2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    errorMsg.value = '⚠️ حجم الصورة يجب أن يكون أقل من 2MB'
+  if (file.size > 8 * 1024 * 1024) {
+    errorMsg.value = '⚠️ حجم الصورة يجب أن يكون أقل من 8MB'
     setTimeout(() => { errorMsg.value = '' }, 3000)
     return
   }
